@@ -1,0 +1,10 @@
+name = "FFTInterpolations"
+uuid = "e9c4abe8-3893-4664-acb8-58f49d1e9fc0"
+authors = ["roflmaostc <fxw+git@mailbox.org>"]
+version = "0.1.0"
+
+[deps]
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+
+[compat]
+FFTW = "1.2"
