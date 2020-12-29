@@ -9,4 +9,4 @@ makedocs(modules = [FFTInterpolations],
          ]
         )
 
-deploydocs(repo = "github.com/roflmaostc/FFTInterpolations.jl.git")
+deploydocs(repo = "github.com/roflmaostc/FFTInterpolations.jl.git", devbranch="main")
