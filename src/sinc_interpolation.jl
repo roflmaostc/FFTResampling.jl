@@ -43,8 +43,32 @@ function sinc_interpolate(arr::AbstractArray{T}, new_size) where T<:Real
     return real(sinc_interpolate(arr_nt, new_size))
 end
 
+"""
+    downsample(arr, new_size)
 
-function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Real, N, P}
+Downsample an array `arr` to the new size `new_size`.
+This is calculated by cutting a centered frequency window from the frequency
+spectrum and going back to real space with an `ifft`.
+
+# Examples
+```julia-repl
+julia> FFTInterpolations.downsample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [3])
+3-element Array{Float64,1}:
+ 0.5
+ 0.5
+ 0.5
+
+julia> FFTInterpolations.downsample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [6])
+6-element Array{Float64,1}:
+ 0.6666666666666666
+ 0.0
+ 0.6666666666666666
+ 0.0
+ 0.6666666666666666
+ 0.0
+```
+"""
+function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Complex, N, P}
     if N == 1 && ~(P <:AbstractArray)
         new_size = [new_size]
     end
@@ -54,6 +78,12 @@ function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Real, N, P}
     arr_n = real(ifft(ifftshift(arr_f_n))) ./ length(arr) .* length(arr_f_n)
     return arr_n
 end
+
+function downsample(arr::AbstractArray{T}, new_size) where {T<:Real}
+    arr_nt = Complex.(arr) 
+    return real(downsample(arr_nt, new_size))
+end
+
 
 """
     sinc_interpolate_sum(arr, new_length)
