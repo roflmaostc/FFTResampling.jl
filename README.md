@@ -63,5 +63,5 @@ end
 [CI-img]: https://github.com/roflmaostc/FFTInterpolations.jl/workflows/CI/badge.svg
 [CI-url]: https://github.com/roflmaostc/FFTInterpolations.jl/actions?query=workflow%3ACI 
 
-[codecov-img]: https://codecov.io/gh/roflmaostc/FFTInterpolations.jl/branch/master/graph/badge.svg
+[codecov-img]: https://codecov.io/gh/roflmaostc/FFTInterpolations.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/roflmaostc/FFTInterpolations.jl
