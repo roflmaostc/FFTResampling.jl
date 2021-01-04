@@ -5,6 +5,7 @@ Here you can find the docstrings of all functions.
 ```@docs
 sinc_interpolate
 sinc_interpolate_sum
+FFTInterpolations.make_hermitian
 FFTInterpolations.downsample
 ```
 
