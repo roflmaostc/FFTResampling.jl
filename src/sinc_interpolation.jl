@@ -33,8 +33,11 @@ julia> sinc_interpolate([1.0  2.0; 3.0 4.0], (4,4))
 ```
 """
 function sinc_interpolate(arr::AbstractArray{T}, new_size) where T<:Complex
-    @assert new_size ≥ size(arr)
-
+    if typeof(new_size) <: Number
+        @assert new_size ≥ size(arr)[1] && ndims(arr) == 1
+    else
+        @assert new_size ≥ size(arr)
+    end 
     # go to fourier space
     arr_f = fftshift(fft(arr))
     # create fourier space new array
@@ -114,7 +117,7 @@ julia> FFTInterpolations.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
             @nloops $N2 i (k -> iter_nloops[k]) begin
                 # indices to access the left slice
                 # left slice is the existing slice which will be copied
-                inds_l = collect(@ntuple $N2 i)
+                inds_l = convert(Array{Int},collect(@ntuple $N2 i))
                 insert!(inds_l, d, 1)
                 
                 # right slice which will be copied from the left slice
