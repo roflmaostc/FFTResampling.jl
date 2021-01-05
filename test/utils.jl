@@ -29,3 +29,21 @@ end
     @test FFTInterpolations.get_indices_around_center((4), (2)) == (2, 3)
 end
 
+
+
+
+@testset "utils" begin
+    
+    x = randn((1,2,3,4))
+    y = FFTInterpolations.slice(x, 2, 2)
+    @test x[:, 2:2, :, :] == y
+
+    x = randn((5,2,3,4))
+    y = FFTInterpolations.slice(x, 1, 4)
+    @test x[4:4, :, :, :] == y
+
+    x = randn((5))
+    y = FFTInterpolations.slice(x, 1, 5)
+    @test x[5:5] == y
+
+end

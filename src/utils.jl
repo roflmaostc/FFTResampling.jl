@@ -104,3 +104,44 @@ function center_pos(x::Integer)
     # integer division
     return div(x, 2) + 1
 end
+
+
+
+"""
+    slice(arr, dim, index)
+
+Return a `N` dimensional slice (where one dimensions has size 1) of the N-dimensional `arr` at the index position
+`index` in the `dim` dimension of the array.
+It holds `size(out)[dim] == 1`.
+
+# Examples
+```julia-repl
+julia> x = randn((3, 3))
+3×3 Array{Float64,2}:
+ -0.925331   1.79456     0.465846
+ -0.18492    0.705636    0.328199
+  1.36222   -0.0132336  -0.586589
+
+julia> FFTInterpolations.slice(x, 2, 2)
+3×1 Array{Float64,2}:
+  1.794557861500336
+  0.7056355732334497
+ -0.013233577444161712
+
+julia> FFTInterpolations.slice(x, 1, 1)
+1×3 Array{Float64,2}:
+ -0.925331  1.79456  0.465846
+```
+
+"""
+function slice(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T, N}
+    @assert 1 ≤ dim ≤ N
+
+    inds = fill(1:1, N)
+
+    for (i, v) in enumerate(size(arr))
+        inds[i] = (dim == i ? (index:index) : (1:v))
+    end
+
+    return arr[inds...]
+end
