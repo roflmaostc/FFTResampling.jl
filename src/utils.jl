@@ -65,9 +65,6 @@ function make_hermitian(arr::AbstractArray{T, N}) where {T, N}
 end
 
 
-
-
-
 """
     get_indices_around_center(i_in, i_out)
 A function which provides two output indices `i1` and `i2`

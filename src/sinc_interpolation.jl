@@ -1,8 +1,5 @@
 export sinc_interpolate, sinc_interpolate_sum
 
-using Base.Cartesian
-using GeneralizedGenerated
-
 """
     sinc_interpolate(arr, new_size)
 
