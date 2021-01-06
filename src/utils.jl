@@ -108,7 +108,7 @@ julia> FFTInterpolations.center_extract([1 2; 3 4], [1])
 
 julia> FFTInterpolations.center_extract([1 2; 3 4], [1, 1])
 1×1 Array{Int64,2}:
-4
+ 4
 
 julia> FFTInterpolations.center_extract([1 2 3; 3 4 5; 6 7 8], [2 2])
 2×2 Array{Int64,2}:
@@ -141,7 +141,7 @@ as for FFT based centered.
 Function works both for even and uneven arrays.
 # Examples
 ```jldoctest
-julia> center_set!([1, 1, 1, 1, 1, 1], [5, 5, 5])
+julia> FFTInterpolations.center_set!([1, 1, 1, 1, 1, 1], [5, 5, 5])
 6-element Array{Int64,1}:
  1
  1
@@ -171,9 +171,9 @@ Calculate the position of the center frequency.
 Size of the array is `x`
 # Examples
 ```jldoctest
-julia> center_pos(3)
+julia> FFTInterpolations.center_pos(3)
 2
-julia> center_pos(4)
+julia> FFTInterpolations.center_pos(4)
 3
 ```
 """
