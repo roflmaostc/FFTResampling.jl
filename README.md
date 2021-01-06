@@ -10,7 +10,7 @@ The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited 
 `sinc_interpolate_sum` is a naive implementation of the sum based sinc interpolation. `sinc_interpolate_sum` only works for 1D arrays.
 
 ## Installation
-`FFTInterpolations.jl` is available for all version equal or above Julia 1.0. It is mainly tested under Linux but should also work on Windows.
+`FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested under Linux but should also work on Windows.
 It can be installed with the following command
 
 ```julia
@@ -18,7 +18,8 @@ julia> ] add https://github.com/roflmaostc/FFTInterpolations.jl
 ```
 
 ## Example
-Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`
+Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`.
+Furthermore, there is an image interpolation Pluto.jl notebook in the [examples folder](examples/).
 
 ```julia
  begin
