@@ -65,6 +65,7 @@ end
     test_real((12, 13, 14, 15), (12, 13, 13, 13))
     test_real((12, 13, 14, 15), (12, 12, 13, 14))
 
+    test_real((7,7), (6,6))
     test_real(100, 99)
     test_real(101, 89)
     test_real(100, 98)

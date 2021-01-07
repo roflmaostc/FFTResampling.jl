@@ -1,4 +1,4 @@
-export sinc_interpolate, sinc_interpolate_sum
+export sinc_interpolate, sinc_interpolate_sum, downsample
 
 """
     sinc_interpolate(arr, new_size)
@@ -106,10 +106,12 @@ function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Complex, N,
         new_size = collect(new_size)
     end
     arr_f = fftshift(fft(arr))
-    
+    arr_out = copy(arr_f) 
     # if the new_size[d] is even, we need to add the highest positive frequency
     # of the initial spectrum
     # to the highest negative one. In that way, we get a purely real result
+    
+    fix_mul = false
     for d = 1:N
         if new_size[d] % 2 == 1 || new_size[d] == size(arr)[d] ||
             (size(arr)[d] % 2 == 0 && new_size[d] == (size(arr)[d] + 1))
@@ -131,12 +133,19 @@ function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Complex, N,
                 push!(inds_assign, a:min(b+1, size(arr)[i]))
             end
         end
+
         # add the highest positive frequency slice to the highest negative
-        arr_f[inds_assign...] += arr_f[inds_extract...]
+        
+        # x = copy(arr_f[map(x -> x[1], inds_assign)...])
+        arr_out[inds_assign...] = 0.5 .* (arr_f[inds_assign...] .+ arr_f[inds_extract...])
+        arr_out[map(x -> x[1], inds_assign)...] = real(arr_f[map(x -> x[1], inds_assign)...])
     end
    
+
+
+
     # do the cutting in Fourier space
-    arr_f_n = center_extract(arr_f, new_size)
+    arr_f_n = center_extract(arr_out, new_size)
     # back to real space and renormalization
     arr_n = ifft(ifftshift(arr_f_n)) ./ length(arr) .* length(arr_f_n)
     return arr_n
