@@ -262,3 +262,19 @@ function reverse_all_indices(arr)
     end
     return out 
 end
+
+
+
+function dft_1D(arr)
+    N = length(arr)
+    X = zeros(ComplexF64, N)
+    
+    for k = 0:N-1
+        s = zero(X[1])
+        for n = 0:N-1
+            s += arr[n + 1]  * exp(-1im*2*π*k *n/ N)
+        end
+        X[k+1] = s
+    end
+    return X
+end
