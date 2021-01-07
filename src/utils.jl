@@ -196,21 +196,22 @@ julia> x = [1 2 3; 4 5 6; 7 8 9]
  4  5  6
  7  8  9
 
-julia> FFTInterpolations.slice(x, 2, 2)
-3×1 Array{Int64,2}:
- 2
- 5
- 8
-
 julia> FFTInterpolations.slice(x, 1, 1)
-1×3 Array{Int64,2}:
+1×3 view(::Array{Int64,2}, 1:1, :) with eltype Int64:
  1  2  3
+
+julia> FFTInterpolations.slice(x, 2, 3)
+3×1 view(::Array{Int64,2}, :, 3:3) with eltype Int64:
+ 3
+ 6
+ 9
+
 ```
 
 """
 function slice(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T, N}
     inds = slice_indices(arr, dim, index)
-    return arr[inds...]
+    return @view arr[inds...]
 end
 
 
