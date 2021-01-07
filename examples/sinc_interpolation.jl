@@ -51,6 +51,19 @@ begin
 	plot!(xs_high, arr_high, linestyle=:dashdotdot, label="High sampling")
 end
 
+# ╔═╡ 20f9491e-511b-11eb-1a6e-c3af6f5e11a5
+md"#### Downsampling"
+
+# ╔═╡ 2e7e1800-511b-11eb-3334-4ddf5076143e
+arr_ds = FFTInterpolations.downsample(arr_interp, length(xs_low))
+
+# ╔═╡ 29db9534-511b-11eb-1bdf-37ea0594681f
+begin
+	scatter(xs_low, arr_low, legend=:bottomleft, markersize=2, label="Low sampling")
+	plot!(xs_interp, arr_interp, label="FFT based sinc interpolation", linestyle=:dash)
+	plot!(xs_low, arr_ds, label="downsampled array", linestyle=:dot)	
+end
+
 # ╔═╡ Cell order:
 # ╠═f054ac12-47b3-11eb-0d47-43990d3906a8
 # ╟─c5555382-4924-11eb-15d1-17cb887ca876
@@ -59,3 +72,6 @@ end
 # ╠═b8fe21d8-47b5-11eb-1854-09254d3cbba1
 # ╟─bf11f160-4924-11eb-3812-777bb547f499
 # ╠═0511d792-47b4-11eb-316a-3d0148d68406
+# ╟─20f9491e-511b-11eb-1a6e-c3af6f5e11a5
+# ╠═2e7e1800-511b-11eb-3334-4ddf5076143e
+# ╠═29db9534-511b-11eb-1bdf-37ea0594681f
