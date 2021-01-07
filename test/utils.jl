@@ -242,3 +242,14 @@ end
 end
 
 
+
+@testset "test 1D dft" begin
+    x = randn(1)
+    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+    
+    x = randn(122)
+    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+    
+    x = randn(123)
+    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+end

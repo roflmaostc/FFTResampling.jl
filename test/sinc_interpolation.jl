@@ -52,6 +52,25 @@ end
     test_downsample(253, 254)
     test_downsample(253, 1001)
     test_downsample(99, 100101)
+
+    
+    function test_real(s, s_n)
+        x = randn(s)
+        x = x .+ 0.0im
+        y = FFTInterpolations.downsample(x, s_n)
+        @test all(imag.(y) .< 1e-14)
+    end
+    
+    test_real((12, 13, 14, 15), (12, 12, 12, 12))
+    test_real((12, 13, 14, 15), (12, 13, 13, 13))
+    test_real((12, 13, 14, 15), (12, 12, 13, 14))
+
+    test_real(100, 99)
+    test_real(101, 89)
+    test_real(100, 98)
+    test_real(101, 90)
+
+
 end
 
 
