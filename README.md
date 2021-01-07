@@ -5,9 +5,8 @@
 | [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
 
 
-This package provides a simple sinc interpolation written in Julia.
+This package provides a simple sinc interpolation (up and downsampling) written in Julia.
 The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited (and properly Nyquist sampled) signal.
-`sinc_interpolate_sum` is a naive implementation of the sum based sinc interpolation. `sinc_interpolate_sum` only works for 1D arrays.
 
 ## Installation
 `FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested under Linux but should also work on Windows.
@@ -16,6 +15,12 @@ It can be installed with the following command
 ```julia
 julia> ] add https://github.com/roflmaostc/FFTInterpolations.jl
 ```
+
+## Functionality
+This package currently works only with equidistant spaced signals. We offer two main methods: `sinc_interpolate` and `downsample`.
+The first one upsamples a signal by zero padding in Fourier space.
+The second one downsamples a signal by cropping frequencies around the center spot. We therefore reduce resolution without aliasing. 
+
 
 ## Example
 Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`.
