@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
@@ -27,7 +27,7 @@ begin
 	y_exact = x_exact'
 	arr = sinc.(sqrt.(x .^2 .+ y .^2))
 	arr_exact = sinc.(sqrt.(x_exact .^2 .+ y_exact .^2))
-	arr_interp = sinc_interpolate(arr[1:end, 1:end], (129, 129));
+	arr_interp = sinc_interpolate(arr[1:end, 1:end], (131, 131));
 	arr_interp2 = sinc_interpolate(arr[1:end, 1:end], (512, 512));
 	arr_interp3 = sinc_interpolate(arr[1:end, 1:end], (1024, 1024));
 	arr_ds = downsample(arr_interp, (128, 128))
@@ -35,6 +35,9 @@ end
 
 # ╔═╡ 12d67b86-5028-11eb-1f49-1b1d3b86b4cd
 colorview(Gray, arr_ds)
+
+# ╔═╡ 8999c1ec-5124-11eb-233b-93c53f928a04
+≈(arr_ds, arr, rtol=1e-15)
 
 # ╔═╡ dfbfa426-5049-11eb-140a-e9d9cf94ccbe
 colorview(Gray, arr_interp3)
@@ -84,9 +87,10 @@ end
 
 # ╔═╡ Cell order:
 # ╠═64af5a38-490a-11eb-34bc-37017a602974
-# ╠═aec408dc-490a-11eb-0d5f-b167a9599994
+# ╟─aec408dc-490a-11eb-0d5f-b167a9599994
 # ╠═18d15d82-50ee-11eb-1a86-abae54ad0050
 # ╠═12d67b86-5028-11eb-1f49-1b1d3b86b4cd
+# ╠═8999c1ec-5124-11eb-233b-93c53f928a04
 # ╠═dfbfa426-5049-11eb-140a-e9d9cf94ccbe
 # ╟─12bff398-5028-11eb-04e7-5708064794a6
 # ╠═12a83f3c-5028-11eb-0505-2f152e052077
