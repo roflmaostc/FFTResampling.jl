@@ -279,3 +279,52 @@ function dft_1D(arr)
     end
     return X
 end
+
+
+
+
+
+
+"""
+This function ensures the constraints a spectrum must have so that after
+iffting the result is purely real.
+"""
+function add_high_frequencies(arr, arr_f, arr_out_f, new_size, N)
+    fix_mul = false
+    for d = 1:N
+        if new_size[d] % 2 == 1 || new_size[d] == size(arr)[d] ||
+            (size(arr)[d] % 2 == 0 && new_size[d] == (size(arr)[d] + 1))
+            continue
+        end
+        
+        # construct the slice containing the highest positive frequency
+        inds_extract = []
+        inds_assign = []
+
+        for i = 1:N
+            a,b = get_indices_around_center(size(arr)[i], new_size[i])
+            if i == d
+                # b+1 is the highest positive frequency which 
+                # will be cut off (under certain conditions)
+                iend = min(b+1, size(arr)[i])
+                push!(inds_extract, iend:iend)
+                push!(inds_assign, a:a)
+            else
+                push!(inds_extract, a:min(b+1, size(arr)[i]))
+                push!(inds_assign, a:min(b+1, size(arr)[i]))
+            end
+        end
+
+        # add the highest positive frequency slice to the highest negative
+        arr_out_f[inds_assign...] = 0.5 .* (arr_out_f[inds_assign...] .+ arr_out_f[inds_extract...])
+        # arr_out_f[inds_assign...] = 0.5 .* (arr_f[inds_assign...] .+ reverse_all(arr_f[inds_extract...]))
+        # arr_out_f[inds_assign...] = 0.5 .* (arr_f[inds_assign...] .+ arr_f[inds_extract...])
+        # arr_out_f[map(x -> x[1], inds_assign)...] = real(arr_f[map(x -> x[1], inds_assign)...])
+    end
+    
+    # @show arr3 ≈ arr_out_f
+    return arr_out_f
+end
+
+
+
