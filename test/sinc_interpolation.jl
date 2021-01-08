@@ -75,3 +75,25 @@ end
 end
 
 
+
+@testset "FFT sinc downsample and upsample together in 2D" begin
+    x = range(-10.0, 10.0, length=129)[1:end-1]
+	x_exact = range(-10.0, 10.0, length=2049)[1:end-1]
+	y = x'
+	y_exact = x_exact'
+	arr = sinc.(sqrt.(x .^2 .+ y .^2))
+	arr_exact = sinc.(sqrt.(x_exact .^2 .+ y_exact .^2))
+	arr_interp = sinc_interpolate(arr[1:end, 1:end], (131, 131));
+	arr_interp2 = sinc_interpolate(arr[1:end, 1:end], (512, 512));
+	arr_interp3 = sinc_interpolate(arr[1:end, 1:end], (1024, 1024));
+	arr_ds = downsample(arr_interp, (128, 128))
+	arr_ds2 = downsample(arr_interp, (128, 128))
+	arr_ds23 = downsample(arr_interp2, (512, 512))
+	arr_ds3 = downsample(arr_interp, (128, 128))
+
+    @test ≈(arr_ds3, arr)
+    @test ≈(arr_ds2, arr)
+    @test ≈(arr_ds, arr)
+    @test ≈(arr_ds23, arr_interp2)
+
+end

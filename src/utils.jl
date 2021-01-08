@@ -288,8 +288,13 @@ end
 """
 This function ensures the constraints a spectrum must have so that after
 iffting the result is purely real.
+
+For example, inspect `ffshift(fft(randn((6,6))))` and you see that the highest negative
+frequencies obey a certain symmetry. This can be generalized to N dimensions.
+If we cut the array so that it'll be even in the that d dimension (new_size[d] % 2 ==0)
+we need to manually restore the symmetry to guarantee a purely real result.
 """
-function add_high_frequencies(arr, arr_f, arr_out_f, new_size, N)
+function add_high_frequencies(arr, arr_out_f, new_size, N)
     fix_mul = false
     for d = 1:N
         if new_size[d] % 2 == 1 || new_size[d] == size(arr)[d] ||
@@ -316,13 +321,11 @@ function add_high_frequencies(arr, arr_f, arr_out_f, new_size, N)
         end
 
         # add the highest positive frequency slice to the highest negative
-        arr_out_f[inds_assign...] = 0.5 .* (arr_out_f[inds_assign...] .+ arr_out_f[inds_extract...])
-        # arr_out_f[inds_assign...] = 0.5 .* (arr_f[inds_assign...] .+ reverse_all(arr_f[inds_extract...]))
-        # arr_out_f[inds_assign...] = 0.5 .* (arr_f[inds_assign...] .+ arr_f[inds_extract...])
-        # arr_out_f[map(x -> x[1], inds_assign)...] = real(arr_f[map(x -> x[1], inds_assign)...])
+        # but use the same arr_out_f
+        # in that way we create a matrix which has the demanded symmetry of FFT to produce a real result
+        arr_out_f[inds_assign...] = (arr_out_f[inds_assign...] .+ arr_out_f[inds_extract...])
     end
     
-    # @show arr3 ≈ arr_out_f
     return arr_out_f
 end
 

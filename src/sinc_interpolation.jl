@@ -1,12 +1,14 @@
 export sinc_interpolate, sinc_interpolate_sum, downsample
 
 """
-    sinc_interpolate(arr, new_size)
+    sinc_interpolate(arr, new_size [, normalize])
 
 Calculates the `sinc` interpolation of an `arr` on a new array size
 `new_size`.
 This method is based on FFTs and therefore implicitly assumes periodic
 boundaries and a finite frequeny support.
+`normalize=true` by default multiplies by an appropriate factor so that 
+the average intensity stays the same.
 
 # Examples
 ```jldoctest
@@ -29,7 +31,7 @@ julia> sinc_interpolate([1.0  2.0; 3.0 4.0], (4,4))
  2.0  2.5  3.0  2.5
 ```
 """
-function sinc_interpolate(arr::AbstractArray{T}, new_size; real=false) where T<:Complex
+function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true; real=false) where T<:Complex
     if typeof(new_size) <: Number
         @assert new_size ≥ size(arr)[1] && ndims(arr) == 1
     else
@@ -55,33 +57,36 @@ function sinc_interpolate(arr::AbstractArray{T}, new_size; real=false) where T<:
     # set the old array into the new 0-padded array
     center_set!(out_f, arr_f)
     # go back to real space and apply proper value scaling
-    out = ifft(ifftshift(out_f)) ./ length(arr) .* length(out_f)
+    out = ifft(ifftshift(out_f)) 
+    if normalize
+        out .*= length(out_f) ./ length(arr)
+    end
     return out
 end
 
  # for real arrays, take real part due to numerical inaccuracies
-function sinc_interpolate(arr::AbstractArray{T}, new_size) where T<:Real
+function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true) where T<:Real
     # array of same shape but with Complex element type
     arr_nt = Complex.(arr) 
-    return real(sinc_interpolate(arr_nt, new_size, real=true))
+    return real(sinc_interpolate(arr_nt, new_size, normalize, real=true))
 end
 
 
 
 
  # some remarks for real valued downsampling which are not backed up by literature
- # In the case when we want to downsample a odd sized array
- # we need to erase a single slice of frequencies.
- # But iffting yields a complex and non real result.
- # However, if we add the slices from the highest and positive and highest negative
+ # In the case when we want to downsample a odd sized array:
+ # If we add the slices from the highest and positive and highest negative
  # frequencies, we get an real result after iffting.
 
 """
-    downsample(arr, new_size)
+    downsample(arr, new_size [, normalize])
 
 Downsample an array `arr` to the new size `new_size`.
 This is calculated by cutting a centered frequency window from the frequency
 spectrum and going back to real space with an `ifft`.
+`normalize=true` by default multiplies by an appropriate factor so that 
+the average intensity stays the same.
 
 # Examples
 ```jldoctest
@@ -101,28 +106,30 @@ julia> FFTInterpolations.downsample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0
  0.0
 ```
 """
-function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Complex, N, P}
+function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true) where {T<:Complex, N, P}
     if N == 1 && ~(P <:AbstractArray)
         new_size = collect(new_size)
     end
     arr_f = fftshift(fft(arr))
-    arr_out_f = copy(arr_f) 
     # if the new_size[d] is even, we need to add the highest positive frequency
     # of the initial spectrum
     # to the highest negative one. In that way, we get a purely real result
-    arr_out_f = add_high_frequencies(arr, arr_f, arr_out_f, new_size, N)
-
+    arr_out_f = add_high_frequencies(arr, arr_f, new_size, N)
+    # return arr_out_f
 
     # do the cutting in Fourier space
     arr_f_n = center_extract(arr_out_f, new_size)
-    # back to real space and renormalization
-    arr_out = ifft(ifftshift(arr_f_n)) ./ length(arr) .* length(arr_f_n)
+    # back to real space 
+    arr_out = ifft(ifftshift(arr_f_n))
+    if normalize
+        arr_out .*= length(arr_out) ./ length(arr)
+    end
     return arr_out
 end
 
-function downsample(arr::AbstractArray{T}, new_size) where {T<:Real}
+function downsample(arr::AbstractArray{T}, new_size, normalize=true) where {T<:Real}
     arr_nt = Complex.(arr) 
-    return real(downsample(arr_nt, new_size))
+    return real(downsample(arr_nt, new_size, normalize))
 end
 
 
