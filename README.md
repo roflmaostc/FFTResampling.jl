@@ -6,6 +6,7 @@
 
 
 This package provides a simple sinc interpolation (up and downsampling) written in Julia.
+It works with real and complex N-dimensional arrays.
 The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited (and properly Nyquist sampled) signal.
 
 ## Installation
