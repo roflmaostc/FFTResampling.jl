@@ -90,20 +90,20 @@ the average intensity stays the same.
 
 # Examples
 ```jldoctest
-julia> FFTInterpolations.downsample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [3])
+julia> downsample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [3])
 3-element Array{Float64,1}:
  0.5
  0.5
  0.5
 
-julia> FFTInterpolations.downsample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [6])
+julia> downsample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [6])
 6-element Array{Float64,1}:
- 0.6666666666666666
- 0.0
- 0.6666666666666666
- 0.0
- 0.6666666666666666
- 0.0
+  1.0
+ -0.3333333333333333
+  1.0
+ -0.3333333333333333
+  1.0
+ -0.3333333333333333
 ```
 """
 function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true) where {T<:Complex, N, P}
