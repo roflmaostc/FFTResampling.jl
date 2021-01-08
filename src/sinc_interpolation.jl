@@ -60,10 +60,53 @@ function sinc_interpolate(arr::AbstractArray{T}, new_size; real=false) where T<:
 end
 
  # for real arrays, take real part due to numerical inaccuracies
-function sinc_interpolate(arr::AbstractArray{T}, new_size) where T<:Real
+function sinc_interpolate(arr::AbstractArray{T, N}, new_size::P) where {T<:Real, N, P}
+    if typeof(new_size) <: Number
+        @assert new_size ≥ size(arr)[1] && ndims(arr) == 1
+    else
+        @assert new_size ≥ size(arr)
+    end 
     # array of same shape but with Complex element type
-    arr_nt = Complex.(arr) 
-    return real(sinc_interpolate(arr_nt, new_size, real=true))
+
+    if N == 1 && ~(P <:AbstractArray)
+        new_size = collect(new_size)
+    end
+    arr_f = rfft(arr)
+    arr_out_f = zeros(eltype(arr_f), rfft_size(new_size)...) 
+    
+    # inds contains the size of the new array (in frequency domain)
+    # put the old frequencies in new array
+    inds = map(x -> 1:x, size(arr_f))
+    arr_out_f[inds...] = arr_f[inds...]
+
+    # if the output dimension of the output array (in real space) is even
+    # but the input was larger in that dimension, we need to half the highest
+    # frequencies of that dimension (Parseval preserving)
+    fix_edge = false
+    for d = 1:N
+        if size(arr)[d] % 2 == 0 && size(arr)[d] < new_size[d]
+            inds = []
+            for (i, v) in enumerate(size(arr_f))
+                if i == d
+                    push!(inds, v:v)
+                else
+                    push!(inds, 1:v)
+                end
+            end
+            # half these frequencies because of parseval
+            arr_out_f[inds...] .*= 0.5
+
+            # the corner frequencie arr_out_f[end, end, ...] is getting halved
+            # too often. Do it only once, therefore correct it
+            if fix_edge
+                arr_out_f[size(arr_out_f)...] *= 2
+            end
+            fix_edge = true
+        end 
+    end 
+    arr_out = irfft(arr_out_f, new_size[1]) ./ length(arr)
+    arr_out .*= length(arr_out)
+    return arr_out
 end
 
 
@@ -151,9 +194,48 @@ function downsample(arr::AbstractArray{T, N}, new_size::P) where {T<:Complex, N,
     return arr_n
 end
 
-function downsample(arr::AbstractArray{T}, new_size) where {T<:Real}
-    arr_nt = Complex.(arr) 
-    return real(downsample(arr_nt, new_size))
+function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true) where {T<:Real, N, P}
+    if N == 1 && ~(P <:AbstractArray)
+        new_size = collect(new_size)
+    end
+    arr_f = rfft(arr)
+    arr_out_f = zeros(eltype(arr_f), rfft_size(new_size)...) 
+    
+    # inds contains the size of the new array (in frequency domain)
+    # put the old frequencies in new array
+    inds = map(x -> 1:x, size(arr_out_f))
+    arr_out_f[inds...] = arr_f[inds...]
+
+    # if the output dimension of the output array (in real space) is even
+    # but the input was larger in that dimension, we need to half the highest
+    # frequencies of that dimension (Parseval preserving)
+    fix_edge = false
+    for d = 1:N
+        if new_size[d] % 2 == 0 && size(arr)[d] > new_size[d]
+            inds = []
+            for (i, v) in enumerate(size(arr_out_f))
+                if i == d
+                    push!(inds, v:v)
+                else
+                    push!(inds, 1:v)
+                end
+            end
+            # half these frequencies because of parseval
+            arr_out_f[inds...] .*= 0.5
+            
+            # the corner frequencie arr_out_f[end, end, ...] is getting halved
+            # too often. Do it only once, therefore correct it
+            if fix_edge
+                arr_out_f[size(arr_out_f)...] *= 1
+            end
+            fix_edge = true
+        end 
+    end
+    arr_out = irfft(arr_out_f, new_size[1])
+    if normalize
+        arr_out .*= length(arr_out) ./ length(arr)
+    end
+    return arr_out
 end
 
 

@@ -279,3 +279,16 @@ function dft_1D(arr)
     end
     return X
 end
+
+
+"""
+    rft_size(arr_size)
+
+Calculates the size of an array as `rfft` would return.
+"""
+function rfft_size(arr_size)
+    arr_size = collect(arr_size)
+    arr_size[1] = div(arr_size[1], 2) +1 
+    return arr_size 
+end
+
