@@ -1,4 +1,4 @@
-@testset "sinc interpolation fft" begin
+@testset "Sinc interpolation based on FFT" begin
 
     function test_interpolation_sum_fft(N_low, N)
 	    x_min = 0.0
@@ -27,7 +27,7 @@
 end
 
 
-@testset "sinc downsample" begin
+@testset "Downsampling based on frequency cutting" begin
     function test_downsample(N_low, N)
 	    x_min = 0.0
 	    x_max = 16π
@@ -44,6 +44,8 @@ end
 
         arr_ds = FFTInterpolations.downsample(arr_interp, N_low)
         @test ≈(arr_ds, arr_low)
+        @test eltype(arr_low) === eltype(arr_ds)
+        @test eltype(arr_interp) === eltype(arr_ds)
     end
 
     test_downsample(128, 1000)
@@ -54,26 +56,32 @@ end
     test_downsample(99, 100101)
 
     
-    function test_real(s, s_n)
-        x = randn(s)
-        x = x .+ 0.0im
-        y = FFTInterpolations.downsample(x, s_n)
-        @test all(imag.(y) .< 1e-14)
-    end
-    
-    test_real((12, 13, 14, 15), (12, 12, 12, 12))
-    test_real((12, 13, 14, 15), (12, 13, 13, 13))
-    test_real((12, 13, 14, 15), (12, 12, 13, 14))
-
-    test_real((7,7), (6,6))
-    test_real(100, 99)
-    test_real(101, 89)
-    test_real(100, 98)
-    test_real(101, 90)
 
 
 end
 
+
+@testset "Check if downsample and interpolate return real result real input" begin
+    function test_real(s, s_n, s_n2)
+        x = randn(s)
+        y = downsample(x, s_n, take_real=false)
+        y2 = sinc_interpolate(x, s_n2, take_real=false)
+        @test all(imag.(y) .< 1e-15)
+        @test all(imag.(y2) .< 1e-15)
+    end
+    
+    test_real((12, 13, 14, 15), (12, 12, 12, 12), (20, 21, 22, 23))
+    test_real((12, 13, 14, 15), (12, 13, 13, 13), (20, 22, 22, 23))
+    test_real((12, 13, 14, 15), (12, 12, 13, 14), (21, 23, 21, 23))
+
+    test_real((7,7), (6,6), (8, 8))
+    test_real(100, 99, 101)
+    test_real(101, 89, 101)
+    test_real(100, 98, 120)
+    test_real(101, 90, 120)
+
+
+end
 
 
 @testset "FFT sinc downsample and upsample together in 2D" begin
@@ -138,6 +146,8 @@ end
     	arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
     	arr_ds = downsample(arr_interp, in_s)
         
+        @test eltype(arr) === eltype(arr_ds)
+        @test eltype(arr_interp) === eltype(arr_ds)
         @test imag(arr) ≈ imag(arr_ds)
         @test real(arr) ≈ real(arr_ds)
     end
@@ -152,6 +162,39 @@ end
     test_2D((129, 128), (150, 153))
     test_2D((129, 128), (129, 153))
 end
+
+
+
+@testset "FFT sinc downsample and upsample together in 2D for a purely imaginary signal" begin
+    function test_2D(in_s, out_s)
+    	x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
+    	y = range(-10.0, 10.0, length=in_s[2] + 1)[1:end-1]'
+    	f(x, y) = 1im * (abs(x) + abs(y) + sinc(sqrt(x ^2 + y ^2)))
+    
+    	arr = f.(x, y)
+    	arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
+    	arr_ds = downsample(arr_interp, in_s)
+        
+        @test imag(arr) ≈ imag(arr_ds)
+        @test all(real(arr_ds) .< 1e-14)
+        @test all(real(arr_interp) .< 1e-14)
+    end 
+
+    test_2D((128, 128), (150, 150))
+    test_2D((128, 128), (151, 151))
+    test_2D((129, 129), (150, 150))
+    test_2D((129, 129), (151, 151))
+    
+    test_2D((150, 128), (151, 150))
+    test_2D((128, 128), (151, 153))
+    test_2D((129, 128), (150, 153))
+    test_2D((129, 128), (129, 153))
+
+
+end
+
+
+
 
 
 return 
