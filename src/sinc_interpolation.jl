@@ -31,7 +31,7 @@ julia> sinc_interpolate([1.0  2.0; 3.0 4.0], (4,4))
  2.0  2.5  3.0  2.5
 ```
 """
-function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true; real=false) where T<:Complex
+function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true; take_real=true) where T<:Real
     if typeof(new_size) <: Number
         @assert new_size ≥ size(arr)[1] && ndims(arr) == 1
     else
@@ -42,18 +42,18 @@ function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true; real=
     # create fourier space new array
     out_f = zeros(eltype(arr_f), new_size)
    
-    # in this case, change arr_f to be a hermitian array
-    if real
-        arr_f = make_hermitian(arr_f)
-        #it can happen, that arr_f was now padded with an extra row
-        # but there is no extra column in out_f
-        # therefore, cut it
-        inds = []
-        for (a, o) in zip(size(arr_f), size(out_f))
-            push!(inds, 1:min(a, o))
-        end
-        arr_f = arr_f[inds...]
+    # change arr_f to be a hermitian array because we want a purely real result
+    # after iffting
+    arr_f = make_hermitian(arr_f)
+    # it can happen, that arr_f was now padded with an extra row
+    # but there is no extra column in out_f
+    # therefore, cut it
+    inds = []
+    for (a, o) in zip(size(arr_f), size(out_f))
+        push!(inds, 1:min(a, o))
     end
+    arr_f = arr_f[inds...]
+    
     # set the old array into the new 0-padded array
     center_set!(out_f, arr_f)
     # go back to real space and apply proper value scaling
@@ -61,14 +61,20 @@ function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true; real=
     if normalize
         out .*= length(out_f) ./ length(arr)
     end
-    return out
+    if take_real
+        return real(out)
+    else
+        return out
+    end
 end
 
- # for real arrays, take real part due to numerical inaccuracies
-function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true) where T<:Real
+ # for a complex signal: split into real and imaginary part and solve for each 
+ # part individually
+function sinc_interpolate(arr::AbstractArray{T}, new_size, normalize=true) where T<:Complex
     # array of same shape but with Complex element type
-    arr_nt = Complex.(arr) 
-    return real(sinc_interpolate(arr_nt, new_size, normalize, real=true))
+    arr_r = sinc_interpolate(real(arr), new_size, normalize)
+    arr_i = 1im .* sinc_interpolate(imag(arr), new_size, normalize)
+    return arr_r .+ arr_i
 end
 
 
@@ -106,7 +112,7 @@ julia> downsample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [6])
  -0.3333333333333333
 ```
 """
-function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true) where {T<:Complex, N, P}
+function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true; take_real=true) where {T<:Real, N, P}
     if N == 1 && ~(P <:AbstractArray)
         new_size = collect(new_size)
     end
@@ -124,12 +130,20 @@ function downsample(arr::AbstractArray{T, N}, new_size::P, normalize=true) where
     if normalize
         arr_out .*= length(arr_out) ./ length(arr)
     end
-    return arr_out
-end
 
-function downsample(arr::AbstractArray{T}, new_size, normalize=true) where {T<:Real}
-    arr_nt = Complex.(arr) 
-    return real(downsample(arr_nt, new_size, normalize))
+    if take_real
+        return real(arr_out)
+    else
+        return arr_out
+    end
+end
+ 
+ # for a complex signal: split into real and imaginary part and solve for each 
+ # part individually
+function downsample(arr::AbstractArray{T}, new_size, normalize=true) where {T<:Complex}
+    arr_r = downsample(real(arr), new_size, normalize)
+    arr_i = 1im .* downsample(imag(arr), new_size, normalize)
+    return arr_r .+ arr_i
 end
 
 
