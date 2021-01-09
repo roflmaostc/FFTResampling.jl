@@ -82,7 +82,7 @@ end
     function test_2D(in_s, out_s)
         x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
         y = range(-10.0, 10.0, length=in_s[2] + 1)[1:end-1]'
-	    arr = sinc.(sqrt.(x .^2 .+ y .^2))
+	    arr = abs.(x) .+ abs.(y) .+ sinc.(sqrt.(x .^2 .+ y .^2))
 	    arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
 	    arr_ds = downsample(arr_interp, in_s)
         @test arr_ds ≈ arr
@@ -105,9 +105,9 @@ end
     y = x'
     y2 = x2'
     y_exact = x_exact'
-    arr = sinc.(sqrt.(x .^2 .+ y .^2))
-    arr2 = sinc.(sqrt.(x .^2 .+ y .^2))
-    arr_exact = sinc.(sqrt.(x_exact .^2 .+ y_exact .^2))
+    arr = abs.(x) .+ abs.(y) .+sinc.(sqrt.(x .^2 .+ y .^2))
+    arr2 = abs.(x) .+ abs.(y) .+sinc.(sqrt.(x .^2 .+ y .^2))
+    arr_exact = abs.(x_exact) .+ abs.(y_exact) .+ sinc.(sqrt.(x_exact .^2 .+ y_exact .^2))
     arr_interp = sinc_interpolate(arr[1:end, 1:end], (131, 131));
     arr_interp2 = sinc_interpolate(arr[1:end, 1:end], (512, 512));
     arr_interp3 = sinc_interpolate(arr[1:end, 1:end], (1024, 1024));
@@ -122,3 +122,36 @@ end
     @test ≈(arr_ds23, arr_interp2)
 
 end
+
+
+
+
+@testset "FFT sinc downsample and upsample together in 2D for a complex signal" begin
+
+    function test_2D(in_s, out_s)
+    	x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
+    	y = range(-10.0, 10.0, length=in_s[2] + 1)[1:end-1]'
+    	f(x, y) = 1im * (abs(x) + abs(y) + sinc(sqrt(x ^2 + y ^2)))
+    	f2(x, y) =  abs(x) + abs(y) + sinc(sqrt((x - 5) ^2 + (y - 5)^2))
+    
+    	arr = f.(x, y) .+ f2.(x, y)
+    	arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
+    	arr_ds = downsample(arr_interp, in_s)
+        
+        @test imag(arr) ≈ imag(arr_ds)
+        @test real(arr) ≈ real(arr_ds)
+    end
+
+    test_2D((128, 128), (150, 150))
+    test_2D((128, 128), (151, 151))
+    test_2D((129, 129), (150, 150))
+    test_2D((129, 129), (151, 151))
+    
+    test_2D((150, 128), (151, 150))
+    test_2D((128, 128), (151, 153))
+    test_2D((129, 128), (150, 153))
+    test_2D((129, 128), (129, 153))
+end
+
+
+return 
