@@ -66,7 +66,7 @@ end
 32 samples in the downsampled signal should be sufficient for Nyquist sampling.
 And as we can see, the downsampled signal still matches the original one.
 
-```
+```julia
 begin
 	N_ds = 32
 	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
