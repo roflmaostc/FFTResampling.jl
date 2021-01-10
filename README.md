@@ -24,9 +24,11 @@ The second one downsamples a signal by cropping frequencies around the center sp
 
 
 ## Example
+
+#### Sinc interpolation
 Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`.
 Furthermore, there is an image interpolation Pluto.jl notebook in the [examples folder](examples/).
-
+We can see that the interpolated signal matches the higher sampled signal well.
 ```julia
  begin
 	N_low = 128
@@ -57,6 +59,25 @@ begin
 	plot!(xs_high, arr_high, linestyle=:dashdotdot, label="High sampling")
 end
 ```
+#### Downsampling
+32 samples in the downsampled signal should be sufficient for Nyquist sampling.
+And as we can see, the downsampled signal still matches the original one.
+
+```
+begin
+	N_ds = 32
+	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
+	arr_ds = FFTInterpolations.downsample(arr_high, N_ds)
+end
+
+begin
+	scatter(xs_low, arr_low, legend=:bottomleft, markersize=2, label="Low sampling")
+	plot!(xs_interp, arr_interp, label="FFT based sinc interpolation", linestyle=:dash)
+	plot!(xs_ds, arr_ds, label="downsampled array", linestyle=:dot)	
+end
+```
+
+
 ![](examples/plot.png)
 
 

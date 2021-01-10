@@ -15,9 +15,9 @@ Please note, that we always exclude `x_max` from the x-positions since the FFT b
 
 # ╔═╡ 0511e9da-47b4-11eb-3bde-c78c192be0cf
 begin
-	N_low = 128
+	N_low = 64
 	x_min = 0.0
-	x_max = 16π
+	x_max = 8*2π
 	
 	xs_low = range(x_min, x_max, length=N_low+1)[1:N_low]
 	xs_high = range(x_min, x_max, length=5000)[1:end-1]
@@ -52,16 +52,23 @@ begin
 end
 
 # ╔═╡ 20f9491e-511b-11eb-1a6e-c3af6f5e11a5
-md"#### Downsampling"
+md"#### Downsampling
+32 samples in the downsampled signal should be sufficient for Nyquist sampling.
+And as we can see, the downsampled signal still matches the original one.
+"
 
 # ╔═╡ 2e7e1800-511b-11eb-3334-4ddf5076143e
-arr_ds = FFTInterpolations.downsample(arr_interp, length(xs_low))
+begin
+	N_ds = 32
+	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
+	arr_ds = FFTInterpolations.downsample(arr_high, N_ds)
+end
 
 # ╔═╡ 29db9534-511b-11eb-1bdf-37ea0594681f
 begin
 	scatter(xs_low, arr_low, legend=:bottomleft, markersize=2, label="Low sampling")
 	plot!(xs_interp, arr_interp, label="FFT based sinc interpolation", linestyle=:dash)
-	plot!(xs_low, arr_ds, label="downsampled array", linestyle=:dot)	
+	plot!(xs_ds, arr_ds, label="downsampled array", linestyle=:dot)	
 end
 
 # ╔═╡ Cell order:
@@ -72,6 +79,6 @@ end
 # ╠═b8fe21d8-47b5-11eb-1854-09254d3cbba1
 # ╟─bf11f160-4924-11eb-3812-777bb547f499
 # ╠═0511d792-47b4-11eb-316a-3d0148d68406
-# ╟─20f9491e-511b-11eb-1a6e-c3af6f5e11a5
+# ╠═20f9491e-511b-11eb-1a6e-c3af6f5e11a5
 # ╠═2e7e1800-511b-11eb-3334-4ddf5076143e
 # ╠═29db9534-511b-11eb-1bdf-37ea0594681f
