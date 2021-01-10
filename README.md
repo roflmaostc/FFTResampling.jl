@@ -10,7 +10,7 @@ It works with real and complex N-dimensional arrays.
 The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited (and properly Nyquist sampled) signal.
 
 ## Installation
-`FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested under Linux but should also work on Windows.
+`FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested in Linux but should also work in Windows.
 It can be installed with the following command
 
 ```julia
