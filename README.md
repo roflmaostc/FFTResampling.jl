@@ -59,6 +59,9 @@ begin
 	plot!(xs_high, arr_high, linestyle=:dashdotdot, label="High sampling")
 end
 ```
+
+![](examples/plot.png)
+
 #### Downsampling
 32 samples in the downsampled signal should be sufficient for Nyquist sampling.
 And as we can see, the downsampled signal still matches the original one.
@@ -77,8 +80,7 @@ begin
 end
 ```
 
-
-![](examples/plot.png)
+![](examples/plot_ds.png)
 
 
 
