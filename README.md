@@ -1,13 +1,15 @@
 # FFTInterpolations.jl
 
+
+This package provides a simple sinc interpolation routine (up and downsampling) written in Julia.
+It works with real and complex N-dimensional arrays.
+
+**As this package is at an early stage of development, we would be excited to welcome any new contributers!**
+
 | **Documentation**                       | **Build Status**                          | **Code Coverage**               |
 |:---------------------------------------:|:-----------------------------------------:|:-------------------------------:|
 | [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
 
-
-This package provides a simple sinc interpolation (up and downsampling) written in Julia.
-It works with real and complex N-dimensional arrays.
-The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited (and properly Nyquist sampled) signal.
 
 ## Installation
 `FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested in Linux but should also work in Windows.
@@ -18,14 +20,15 @@ julia> ] add https://github.com/roflmaostc/FFTInterpolations.jl
 ```
 
 ## Functionality
-This package currently works only with equidistant spaced signals. We offer two main methods: `sinc_interpolate` and `downsample`.
+The FFTW based methods require periodic, bandwidth limited (and properly Nyquist sampled) signals.
+Currently the algorithms work only with equidistant spaced signals. We offer two main methods: `sinc_interpolate` and `downsample`.
 The first one upsamples a signal by zero padding in Fourier space.
 The second one downsamples a signal by cropping frequencies around the center spot. We therefore reduce resolution without aliasing. 
 
 
 ## Example
 
-#### Sinc interpolation
+### Sinc interpolation
 Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`.
 Furthermore, there is an image interpolation Pluto.jl notebook in the [examples folder](examples/).
 We can see that the interpolated signal matches the higher sampled signal well.
@@ -62,7 +65,7 @@ end
 
 ![](examples/plot.png)
 
-#### Downsampling
+### Downsampling
 32 samples in the downsampled signal should be sufficient for Nyquist sampling.
 And as we can see, the downsampled signal still matches the original one.
 
