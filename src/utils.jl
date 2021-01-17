@@ -6,17 +6,17 @@ so that `arr` is a hermitian array which preserves Parseval's theorem.
 
 # Examples
 ```jldoctest
-julia> FFTInterpolations.make_hermitian([1.0 2.0])
+julia> FFTResampling.make_hermitian([1.0 2.0])
 1×3 Array{Float64,2}:
  0.5  2.0  0.5
 
-julia> FFTInterpolations.make_hermitian([1.0 2.0; 3.0 4.0])
+julia> FFTResampling.make_hermitian([1.0 2.0; 3.0 4.0])
 3×3 Array{Float64,2}:
  0.5  1.0  0.0
  1.5  4.0  1.5
  0.0  1.0  0.5
 
-julia> FFTInterpolations.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
+julia> FFTResampling.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
 3×3 Array{Complex{Float64},2}:
  0.0+0.5im  2.0+0.0im  2.5-0.0im
  0.0+1.5im  0.0+4.0im  0.0-1.5im
@@ -99,15 +99,15 @@ If `length(new_size_array) < length(ndims(arr))` the remaining dimensions
 are untouched and copied.
 # Examples
 ```jldoctest
-julia> FFTInterpolations.center_extract([1 2; 3 4], [1]) 
+julia> FFTResampling.center_extract([1 2; 3 4], [1]) 
 1×2 Array{Int64,2}:
  3  4
 
-julia> FFTInterpolations.center_extract([1 2; 3 4], [1, 1])
+julia> FFTResampling.center_extract([1 2; 3 4], [1, 1])
 1×1 Array{Int64,2}:
  4
 
-julia> FFTInterpolations.center_extract([1 2 3; 3 4 5; 6 7 8], [2 2])
+julia> FFTResampling.center_extract([1 2 3; 3 4 5; 6 7 8], [2 2])
 2×2 Array{Int64,2}:
  1  2
  3  4
@@ -138,7 +138,7 @@ as for FFT based centered.
 Function works both for even and uneven arrays.
 # Examples
 ```jldoctest
-julia> FFTInterpolations.center_set!([1, 1, 1, 1, 1, 1], [5, 5, 5])
+julia> FFTResampling.center_set!([1, 1, 1, 1, 1, 1], [5, 5, 5])
 6-element Array{Int64,1}:
  1
  1
@@ -168,9 +168,9 @@ Calculate the position of the center frequency.
 Size of the array is `x`
 # Examples
 ```jldoctest
-julia> FFTInterpolations.center_pos(3)
+julia> FFTResampling.center_pos(3)
 2
-julia> FFTInterpolations.center_pos(4)
+julia> FFTResampling.center_pos(4)
 3
 ```
 """
@@ -196,11 +196,11 @@ julia> x = [1 2 3; 4 5 6; 7 8 9]
  4  5  6
  7  8  9
 
-julia> FFTInterpolations.slice(x, 1, 1)
+julia> FFTResampling.slice(x, 1, 1)
 1×3 view(::Array{Int64,2}, 1:1, :) with eltype Int64:
  1  2  3
 
-julia> FFTInterpolations.slice(x, 2, 3)
+julia> FFTResampling.slice(x, 2, 3)
 3×1 view(::Array{Int64,2}, :, 3:3) with eltype Int64:
  3
  6
@@ -234,16 +234,16 @@ Reverse an array `arr` over all dimensions.
 
 # Examples
 ```jldoctest
-julia> FFTInterpolations.reverse_all([1 2 3 4 5])
+julia> FFTResampling.reverse_all([1 2 3 4 5])
 1×5 Array{Int64,2}:
  5  4  3  2  1
 
-julia> FFTInterpolations.reverse_all([1 2 3 4 5; 7 8 9 10 11])
+julia> FFTResampling.reverse_all([1 2 3 4 5; 7 8 9 10 11])
 2×5 Array{Int64,2}:
  11  10  9  8  7
   5   4  3  2  1
 
-julia> FFTInterpolations.reverse_all([1; 2; 3; 4; 5])
+julia> FFTResampling.reverse_all([1; 2; 3; 4; 5])
 5-element Array{Int64,1}:
  5
  4
@@ -328,6 +328,4 @@ function add_high_frequencies(arr, arr_out_f, new_size, N)
     
     return arr_out_f
 end
-
-
 

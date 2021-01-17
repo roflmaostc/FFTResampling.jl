@@ -1,4 +1,4 @@
-module FFTInterpolations
+module FFTResampling
 
 using FFTW
 

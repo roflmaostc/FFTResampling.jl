@@ -1,5 +1,5 @@
 using Test
-using FFTInterpolations
+using FFTResampling
 using GeneralizedGenerated
 using Base.Cartesian
 using FFTW

@@ -14,7 +14,7 @@
 	    arr_interp = sinc_interpolate(arr_low, N)
 
 	    xs_interp_s = range(x_min, x_max, length=N+1)[1:N]
-	    arr_interp_s = FFTInterpolations.sinc_interpolate_sum(arr_low, N)
+	    arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N)
 
         @test ≈(arr_interp[2*N ÷10: N*8÷10], arr_high[2* N ÷10: N*8÷10], rtol=0.05)
         @test ≈(arr_high[2*N ÷10: N*8÷10], arr_interp_s[2*N ÷10: N*8÷10], rtol=0.05)
@@ -40,9 +40,9 @@ end
 	    arr_interp = sinc_interpolate(arr_low, N)
 
 	    xs_interp_s = range(x_min, x_max, length=N+1)[1:N]
-	    arr_interp_s = FFTInterpolations.sinc_interpolate_sum(arr_low, N)
+	    arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N)
 
-        arr_ds = FFTInterpolations.downsample(arr_interp, N_low)
+        arr_ds = FFTResampling.downsample(arr_interp, N_low)
         @test ≈(arr_ds, arr_low)
         @test eltype(arr_low) === eltype(arr_ds)
         @test eltype(arr_interp) === eltype(arr_ds)

@@ -3,8 +3,8 @@ function center_test(x1, x2, x3, y1, y2, y3)
     arr1 = randn((x1, x2, x3))
     arr2 = zeros((y1, y2, y3))
 
-    FFTInterpolations.center_set!(arr2, arr1)
-    arr3 = FFTInterpolations.center_extract(arr2, (x1, x2, x3))
+    FFTResampling.center_set!(arr2, arr1)
+    arr3 = FFTResampling.center_extract(arr2, (x1, x2, x3))
     @test arr1 == arr3
 end
 
@@ -16,17 +16,17 @@ end
     center_test(6, 4, 4, 7, 8, 8)
 
 
-    @test 1 == FFTInterpolations.center_pos(1)
-    @test 2 == FFTInterpolations.center_pos(2)
-    @test 2 == FFTInterpolations.center_pos(3)
-    @test 3 == FFTInterpolations.center_pos(4)
-    @test 3 == FFTInterpolations.center_pos(5)
-    @test 513 == FFTInterpolations.center_pos(1024)
+    @test 1 == FFTResampling.center_pos(1)
+    @test 2 == FFTResampling.center_pos(2)
+    @test 2 == FFTResampling.center_pos(3)
+    @test 3 == FFTResampling.center_pos(4)
+    @test 3 == FFTResampling.center_pos(5)
+    @test 513 == FFTResampling.center_pos(1024)
 
-    @test FFTInterpolations.get_indices_around_center((5), (2)) == (2, 3)
-    @test FFTInterpolations.get_indices_around_center((5), (3)) == (2, 4)
-    @test FFTInterpolations.get_indices_around_center((4), (3)) == (2, 4)
-    @test FFTInterpolations.get_indices_around_center((4), (2)) == (2, 3)
+    @test FFTResampling.get_indices_around_center((5), (2)) == (2, 3)
+    @test FFTResampling.get_indices_around_center((5), (3)) == (2, 4)
+    @test FFTResampling.get_indices_around_center((4), (3)) == (2, 4)
+    @test FFTResampling.get_indices_around_center((4), (2)) == (2, 3)
 end
 
 
@@ -35,15 +35,15 @@ end
 @testset "slice" begin
     
     x = randn((1,2,3,4))
-    y = FFTInterpolations.slice(x, 2, 2)
+    y = FFTResampling.slice(x, 2, 2)
     @test x[:, 2:2, :, :] == y
 
     x = randn((5,2,3,4))
-    y = FFTInterpolations.slice(x, 1, 4)
+    y = FFTResampling.slice(x, 1, 4)
     @test x[4:4, :, :, :] == y
 
     x = randn((5))
-    y = FFTInterpolations.slice(x, 1, 5)
+    y = FFTResampling.slice(x, 1, 5)
     @test x[5:5] == y
 
 end
@@ -51,20 +51,20 @@ end
 
 @testset "slice indices" begin
     x = randn((1,2,3))
-    y = FFTInterpolations.slice_indices(x, 1, 1)
+    y = FFTResampling.slice_indices(x, 1, 1)
     @test y == [1:1, :, :]
 
 
     x = randn((20,4,20, 1, 2))
-    y = FFTInterpolations.slice_indices(x, 2, 3)
+    y = FFTResampling.slice_indices(x, 2, 3)
     @test y == [:, 3:3, :, :, :]
 end
 
 
 
 @testset "reverse function" begin
-    reverse_all = FFTInterpolations.reverse_all
-    reverse_all_indices = FFTInterpolations.reverse_all_indices
+    reverse_all = FFTResampling.reverse_all
+    reverse_all_indices = FFTResampling.reverse_all_indices
     function test_reverse(x, y)
         x_rev = reverse_all(x)
         @test x == reverse_all(x_rev)
@@ -154,24 +154,24 @@ end
 
 
 @testset "make hermitian" begin
-    a = FFTInterpolations.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
+    a = FFTResampling.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
 
     ã = [0.0+0.5im  2.0+0.0im  2.5-0.0im; 0.0+1.5im  0.0+4.0im  0.0-1.5im; 2.5+0.0im  0.0+6.0im  0.0-0.5im]
 
     @test a ≈ ã
     
-    a = FFTInterpolations.make_hermitian([1.0; 2.0; 3.0im])
+    a = FFTResampling.make_hermitian([1.0; 2.0; 3.0im])
     ã = [1.0; 2.0; 3.0im]
     @test a ≈ ã
 
 
-    a = FFTInterpolations.make_hermitian([1.0+1.0im; 2.0; 3.0; 3.0im])
+    a = FFTResampling.make_hermitian([1.0+1.0im; 2.0; 3.0; 3.0im])
     ã = [0.5+0.5im; 2.0; 3.0; 3.0im; 0.5-0.5im]
     @test a ≈ ã
 
     function test_sum(s)
         a = randn(s)
-        ã = FFTInterpolations.make_hermitian(a)
+        ã = FFTResampling.make_hermitian(a)
         @test sum(a) ≈ sum(ã)
     end    
     test_sum((12, 3, 12, 11, 1))
@@ -187,7 +187,7 @@ end
 
     function test_symmetry(s)
         a = randn(s) 
-        b = FFTInterpolations.make_hermitian(a)
+        b = FFTResampling.make_hermitian(a)
 
         for k1 = 1:size(b)[1]
             for k2 = 1:size(b)[2]
@@ -209,7 +209,7 @@ end
 
     function test_symmetry_4D(s)
         a = randn(s) 
-        b = FFTInterpolations.make_hermitian(a)
+        b = FFTResampling.make_hermitian(a)
 
         for k1 = 1:size(b)[1]
             for k2 = 1:size(b)[2]
@@ -228,7 +228,7 @@ end
     test_symmetry_4D((2,4, 6, 8))
     
     function compare_ref(x)
-        a = FFTInterpolations.make_hermitian(x)
+        a = FFTResampling.make_hermitian(x)
         b = make_hermitian_ref(x)
         @test a ≈ b
     end
@@ -245,11 +245,11 @@ end
 
 @testset "test 1D dft" begin
     x = randn(1)
-    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+    @test fft(x) ≈ FFTResampling.dft_1D(x)
     
     x = randn(122)
-    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+    @test fft(x) ≈ FFTResampling.dft_1D(x)
     
     x = randn(123)
-    @test fft(x) ≈ FFTInterpolations.dft_1D(x)
+    @test fft(x) ≈ FFTResampling.dft_1D(x)
 end
