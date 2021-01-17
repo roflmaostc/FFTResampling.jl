@@ -1,4 +1,4 @@
-# FFTInterpolations.jl
+# FFTResampling.jl
 
 | **Documentation**                       | **Build Status**                          | **Code Coverage**               |
 |:---------------------------------------:|:-----------------------------------------:|:-------------------------------:|
@@ -10,11 +10,11 @@ It works with real and complex N-dimensional arrays.
 The FFTW based method `sinc_interpolate` requires a periodic, bandwidth limited (and properly Nyquist sampled) signal.
 
 ## Installation
-`FFTInterpolations.jl` is available for all version equal or above Julia 1.3. It is mainly tested in Linux but should also work in Windows.
+`FFTResampling.jl` is available for all version equal or above Julia 1.3. It is mainly tested in Linux but should also work in Windows.
 It can be installed with the following command
 
 ```julia
-julia> ] add https://github.com/roflmaostc/FFTInterpolations.jl
+julia> ] add https://github.com/roflmaostc/FFTResampling.jl
 ```
 
 ## Functionality
@@ -49,7 +49,7 @@ begin
 
 	N2 = 1000
 	xs_interp_s = range(x_min, x_max, length=N2+1)[1:N2]
-	arr_interp_s = FFTInterpolations.sinc_interpolate_sum(arr_low, N2)
+	arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N2)
 end
 
 begin
@@ -70,7 +70,7 @@ And as we can see, the downsampled signal still matches the original one.
 begin
 	N_ds = 32
 	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
-	arr_ds = FFTInterpolations.downsample(arr_high, N_ds)
+	arr_ds = FFTResampling.downsample(arr_high, N_ds)
 end
 
 begin
@@ -85,13 +85,13 @@ end
 
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-pink.svg 
-[docs-dev-url]: https://roflmaostc.github.io/FFTInterpolations.jl/dev/ 
+[docs-dev-url]: https://roflmaostc.github.io/FFTResampling.jl/dev/ 
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-darkgreen.svg 
-[docs-stable-url]: https://roflmaostc.github.io/FFTInterpolations.jl/stable/
+[docs-stable-url]: https://roflmaostc.github.io/FFTResampling.jl/stable/
 
-[CI-img]: https://github.com/roflmaostc/FFTInterpolations.jl/workflows/CI/badge.svg
-[CI-url]: https://github.com/roflmaostc/FFTInterpolations.jl/actions?query=workflow%3ACI 
+[CI-img]: https://github.com/roflmaostc/FFTResampling.jl/workflows/CI/badge.svg
+[CI-url]: https://github.com/roflmaostc/FFTResampling.jl/actions?query=workflow%3ACI 
 
-[codecov-img]: https://codecov.io/gh/roflmaostc/FFTInterpolations.jl/branch/main/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/roflmaostc/FFTInterpolations.jl
+[codecov-img]: https://codecov.io/gh/roflmaostc/FFTResampling.jl/branch/main/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/roflmaostc/FFTResampling.jl
