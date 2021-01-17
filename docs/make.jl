@@ -1,12 +1,12 @@
-using FFTInterpolations, Documenter 
+using FFTResampling, Documenter 
 
  # set seed fixed for documentation
-DocMeta.setdocmeta!(FFTInterpolations, :DocTestSetup, :(using FFTInterpolations); recursive=true)
-makedocs(modules = [FFTInterpolations], 
-         sitename = "FFTInterpolations.jl", 
+DocMeta.setdocmeta!(FFTResampling, :DocTestSetup, :(using FFTResampling); recursive=true)
+makedocs(modules = [FFTResampling], 
+         sitename = "FFTResampling.jl", 
          pages = Any[
-            "FFTInterpolations.jl" => "index.md",
+            "FFTResampling.jl" => "index.md",
          ]
         )
 
-deploydocs(repo = "github.com/roflmaostc/FFTInterpolations.jl.git", devbranch="main")
+deploydocs(repo = "github.com/roflmaostc/FFTResampling.jl.git", devbranch="main")
