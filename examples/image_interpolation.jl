@@ -14,7 +14,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 64af5a38-490a-11eb-34bc-37017a602974
-using Revise, FFTInterpolations, Images, TestImages, Interpolations, PlutoUI, FFTW
+using Revise, FFTResampling, Images, TestImages, Interpolations, PlutoUI, FFTW
 
 # ╔═╡ aec408dc-490a-11eb-0d5f-b167a9599994
 md"#### Image Interpolation with FFT based sinc interpolation"
@@ -85,6 +85,15 @@ begin
 	colorview(Gray, img_all[200:300, 200:300, index])
 end
 
+# ╔═╡ 31d86b98-5327-11eb-117b-9b8bf777e5f4
+
+
+# ╔═╡ 31d857a0-5327-11eb-0cfd-33aae485939a
+
+
+# ╔═╡ 31d840c8-5327-11eb-1f45-7508a430a4f7
+
+
 # ╔═╡ Cell order:
 # ╠═64af5a38-490a-11eb-34bc-37017a602974
 # ╟─aec408dc-490a-11eb-0d5f-b167a9599994
@@ -100,3 +109,6 @@ end
 # ╠═9245616e-490b-11eb-1648-c56a0155a111
 # ╟─4c3e9134-490b-11eb-03a4-4d58d4d942da
 # ╠═6a0cbf10-490b-11eb-10bd-359a3425da42
+# ╠═31d86b98-5327-11eb-117b-9b8bf777e5f4
+# ╠═31d857a0-5327-11eb-0cfd-33aae485939a
+# ╠═31d840c8-5327-11eb-1f45-7508a430a4f7

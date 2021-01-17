@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ f054ac12-47b3-11eb-0d47-43990d3906a8
-using Revise, FFTInterpolations, Plots, FFTW
+using Revise, FFTResampling, Plots, FFTW
 
 # ╔═╡ c5555382-4924-11eb-15d1-17cb887ca876
 md"#### Preparing data
@@ -37,7 +37,7 @@ begin
 
 	N2 = 1000
 	xs_interp_s = range(x_min, x_max, length=N2+1)[1:N2]
-	arr_interp_s = FFTInterpolations.sinc_interpolate_sum(arr_low, N2)
+	arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N2)
 end
 
 # ╔═╡ bf11f160-4924-11eb-3812-777bb547f499
@@ -61,7 +61,7 @@ And as we can see, the downsampled signal still matches the original one.
 begin
 	N_ds = 32
 	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
-	arr_ds = FFTInterpolations.downsample(arr_high, N_ds)
+	arr_ds = FFTResampling.downsample(arr_high, N_ds)
 end
 
 # ╔═╡ 29db9534-511b-11eb-1bdf-37ea0594681f
