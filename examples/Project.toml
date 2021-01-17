@@ -1,5 +1,6 @@
 [deps]
 FFTInterpolations = "e9c4abe8-3893-4664-acb8-58f49d1e9fc0"
+FFTResampling = "c3173eba-33fe-4761-8a84-0ec65b39ba9a"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 Napari = "ed46c112-542a-4e7e-ab0f-e39321fab6f0"

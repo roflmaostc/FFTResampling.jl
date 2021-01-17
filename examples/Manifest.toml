@@ -209,10 +209,16 @@ version = "4.3.1+4"
 [[FFTInterpolations]]
 deps = ["FFTW"]
 git-tree-sha1 = "4d8024284dfbf53b61e1c83abe719cfb2c5c8f90"
-repo-rev = "main"
-repo-url = "https://github.com/roflmaostc/FFTInterpolations.jl"
 uuid = "e9c4abe8-3893-4664-acb8-58f49d1e9fc0"
 version = "0.1.0"
+
+[[FFTResampling]]
+deps = ["FFTW"]
+git-tree-sha1 = "11da4c4146daf8c8dfa6347df66c999f613ffc5d"
+repo-rev = "main"
+repo-url = "https://github.com/roflmaostc/FFTResampling.jl/"
+uuid = "c3173eba-33fe-4761-8a84-0ec65b39ba9a"
+version = "0.2.0"
 
 [[FFTViews]]
 deps = ["CustomUnitRanges", "FFTW"]
