@@ -16,7 +16,7 @@ It works with real and complex N-dimensional arrays.
 It can be installed with the following command
 
 ```julia
-julia> ] add https://github.com/roflmaostc/FFTResampling.jl
+julia> ] add FFTResampling
 ```
 
 ## Functionality
