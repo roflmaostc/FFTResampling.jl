@@ -91,7 +91,7 @@ end
 Having a Nyquist sampled image, it is possible to perform a sinc interpolation and creating visually much nicer images.
 However, the information content does not change between both images.
 The full Pluto notebook is [here](examples/image_interpolation.jl).
-
+The right image is the upsampled version of the left one.
 
 ![](examples/image_low_res.png)
 ![](examples/image_high_res.png)
