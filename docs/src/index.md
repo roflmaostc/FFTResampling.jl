@@ -3,9 +3,8 @@
 Here you can find the docstrings of all functions.
 
 ```@docs
-sinc_interpolate
-sinc_interpolate_sum
-FFTResampling.downsample
+resample
+FFTResampling.sinc_interpolate_sum
 ```
 
 
