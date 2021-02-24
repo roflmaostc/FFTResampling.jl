@@ -7,11 +7,11 @@ export resample
 
 Calculates the `sinc` interpolation of an `arr` on a new array size
 `new_size`.
-It is basically a re-evaluation of the Fourier series a new grid points.
+It is a re-evaluation of the Fourier series at new grid points.
 `new_size` can be arbitrary. Each dimension is then independently either up or downsampled.
 
 This method is based on FFTs and therefore implicitly assumes periodic
-boundaries and a finite frequeny support.
+boundaries and a finite frequency support.
 `normalize=true` by default multiplies by an appropriate factor so that 
 the average intensity stays the same.
 If `size(new_size)[i] > size(arr)[i]`, we apply zero padding in Fourier space.
@@ -39,13 +39,13 @@ julia> resample([1.0  2.0; 3.0 4.0], (4,4))
  3.0  3.5  4.0  3.5
  2.0  2.5  3.0  2.5
 
-julia> resample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [3])
+julia> resample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], (3))
 3-element Array{Float64,1}:
  0.5
  0.5
  0.5
 
-julia> resample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [6])
+julia> resample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], (6))
 6-element Array{Float64,1}:
   1.0
  -0.3333333333333333
