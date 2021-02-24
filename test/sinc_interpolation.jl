@@ -11,7 +11,7 @@
 	    arr_high = f.(xs_high)
 
 	    xs_interp = range(x_min, x_max, length=N+1)[1:N]
-	    arr_interp = sinc_interpolate(arr_low, N)
+	    arr_interp = resample(arr_low, N)
 
 	    xs_interp_s = range(x_min, x_max, length=N+1)[1:N]
 	    arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N)
@@ -28,7 +28,7 @@ end
 
 
 @testset "Downsampling based on frequency cutting" begin
-    function test_downsample(N_low, N)
+    function test_resample(N_low, N)
 	    x_min = 0.0
 	    x_max = 16π
 	    
@@ -37,23 +37,23 @@ end
 	    arr_low = f.(xs_low)
 
 	    xs_interp = range(x_min, x_max, length=N+1)[1:N]
-	    arr_interp = sinc_interpolate(arr_low, N)
+	    arr_interp = resample(arr_low, N)
 
 	    xs_interp_s = range(x_min, x_max, length=N+1)[1:N]
 	    arr_interp_s = FFTResampling.sinc_interpolate_sum(arr_low, N)
 
-        arr_ds = FFTResampling.downsample(arr_interp, N_low)
+        arr_ds = FFTResampling.resample(arr_interp, N_low)
         @test ≈(arr_ds, arr_low)
         @test eltype(arr_low) === eltype(arr_ds)
         @test eltype(arr_interp) === eltype(arr_ds)
     end
 
-    test_downsample(128, 1000)
-    test_downsample(128, 1232)
-    test_downsample(128, 255)
-    test_downsample(253, 254)
-    test_downsample(253, 1001)
-    test_downsample(99, 100101)
+    test_resample(128, 1000)
+    test_resample(128, 1232)
+    test_resample(128, 255)
+    test_resample(253, 254)
+    test_resample(253, 1001)
+    test_resample(99, 100101)
 
     
 
@@ -61,11 +61,11 @@ end
 end
 
 
-@testset "Check if downsample and interpolate return real result real input" begin
+@testset "Check if resample and interpolate return real result real input" begin
     function test_real(s, s_n, s_n2)
         x = randn(s)
-        y = downsample(x, s_n, take_real=false)
-        y2 = sinc_interpolate(x, s_n2, take_real=false)
+        y = resample(x, s_n, take_real=false)
+        y2 = resample(x, s_n2, take_real=false)
         @test all(imag.(y) .< 5e-15)
         @test all(imag.(y2) .< 5e-14)
     end
@@ -84,15 +84,15 @@ end
 end
 
 
-@testset "FFT sinc downsample and upsample together in 2D" begin
+@testset "FFT sinc resample and upsample together in 2D" begin
 
 
     function test_2D(in_s, out_s)
         x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
         y = range(-10.0, 10.0, length=in_s[2] + 1)[1:end-1]'
 	    arr = abs.(x) .+ abs.(y) .+ sinc.(sqrt.(x .^2 .+ y .^2))
-	    arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
-	    arr_ds = downsample(arr_interp, in_s)
+	    arr_interp = resample(arr[1:end, 1:end], out_s);
+	    arr_ds = resample(arr_interp, in_s)
         @test arr_ds ≈ arr
     end
 
@@ -116,13 +116,13 @@ end
     arr = abs.(x) .+ abs.(y) .+sinc.(sqrt.(x .^2 .+ y .^2))
     arr2 = abs.(x) .+ abs.(y) .+sinc.(sqrt.(x .^2 .+ y .^2))
     arr_exact = abs.(x_exact) .+ abs.(y_exact) .+ sinc.(sqrt.(x_exact .^2 .+ y_exact .^2))
-    arr_interp = sinc_interpolate(arr[1:end, 1:end], (131, 131));
-    arr_interp2 = sinc_interpolate(arr[1:end, 1:end], (512, 512));
-    arr_interp3 = sinc_interpolate(arr[1:end, 1:end], (1024, 1024));
-    arr_ds = downsample(arr_interp, (128, 128))
-    arr_ds2 = downsample(arr_interp, (128, 128))
-    arr_ds23 = downsample(arr_interp2, (512, 512))
-    arr_ds3 = downsample(arr_interp, (128, 128))
+    arr_interp = resample(arr[1:end, 1:end], (131, 131));
+    arr_interp2 = resample(arr[1:end, 1:end], (512, 512));
+    arr_interp3 = resample(arr[1:end, 1:end], (1024, 1024));
+    arr_ds = resample(arr_interp, (128, 128))
+    arr_ds2 = resample(arr_interp, (128, 128))
+    arr_ds23 = resample(arr_interp2, (512, 512))
+    arr_ds3 = resample(arr_interp, (128, 128))
 
     @test ≈(arr_ds3, arr)
     @test ≈(arr_ds2, arr)
@@ -134,7 +134,7 @@ end
 
 
 
-@testset "FFT sinc downsample and upsample together in 2D for a complex signal" begin
+@testset "FFT sinc resample and upsample together in 2D for a complex signal" begin
 
     function test_2D(in_s, out_s)
     	x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
@@ -143,8 +143,8 @@ end
     	f2(x, y) =  abs(x) + abs(y) + sinc(sqrt((x - 5) ^2 + (y - 5)^2))
     
     	arr = f.(x, y) .+ f2.(x, y)
-    	arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
-    	arr_ds = downsample(arr_interp, in_s)
+    	arr_interp = resample(arr[1:end, 1:end], out_s);
+    	arr_ds = resample(arr_interp, in_s)
         
         @test eltype(arr) === eltype(arr_ds)
         @test eltype(arr_interp) === eltype(arr_ds)
@@ -165,15 +165,15 @@ end
 
 
 
-@testset "FFT sinc downsample and upsample together in 2D for a purely imaginary signal" begin
+@testset "FFT sinc resample and upsample together in 2D for a purely imaginary signal" begin
     function test_2D(in_s, out_s)
     	x = range(-10.0, 10.0, length=in_s[1] + 1)[1:end-1]
     	y = range(-10.0, 10.0, length=in_s[2] + 1)[1:end-1]'
     	f(x, y) = 1im * (abs(x) + abs(y) + sinc(sqrt(x ^2 + y ^2)))
     
     	arr = f.(x, y)
-    	arr_interp = sinc_interpolate(arr[1:end, 1:end], out_s);
-    	arr_ds = downsample(arr_interp, in_s)
+    	arr_interp = resample(arr[1:end, 1:end], out_s);
+    	arr_ds = resample(arr_interp, in_s)
         
         @test imag(arr) ≈ imag(arr_ds)
         @test all(real(arr_ds) .< 1e-14)

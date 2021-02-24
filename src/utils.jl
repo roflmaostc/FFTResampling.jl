@@ -40,7 +40,7 @@ function make_hermitian(arr::AbstractArray{T, N}) where {T, N}
     
     # now modify values at the edges to get hermitian property
     # and Parsveval's theorem correct
-    for d = 1:N
+    @inbounds for d = 1:N
         # special case when singleton dimension 
         if size(arr_new)[d] == 1 || size(arr)[d] % 2 == 1
             continue
@@ -283,8 +283,6 @@ end
 
 
 
-
-
 """
 This function ensures the constraints a spectrum must have so that after
 iffting the result is purely real.
@@ -294,11 +292,11 @@ frequencies obey a certain symmetry. This can be generalized to N dimensions.
 If we cut the array so that it'll be even in the that d dimension (new_size[d] % 2 ==0)
 we need to manually restore the symmetry to guarantee a purely real result.
 """
-function add_high_frequencies(arr, arr_out_f, new_size, N)
+function add_high_frequencies(size_arr, arr_out_f, new_size, N)
     fix_mul = false
     for d = 1:N
-        if new_size[d] % 2 == 1 || new_size[d] == size(arr)[d] ||
-            (size(arr)[d] % 2 == 0 && new_size[d] == (size(arr)[d] + 1))
+        if new_size[d] % 2 == 1 || new_size[d] == size_arr[d] ||
+            (size_arr[d] % 2 == 0 && new_size[d] == (size_arr[d] + 1))
             continue
         end
         
@@ -307,16 +305,16 @@ function add_high_frequencies(arr, arr_out_f, new_size, N)
         inds_assign = []
 
         for i = 1:N
-            a,b = get_indices_around_center(size(arr)[i], new_size[i])
+            a,b = get_indices_around_center(size_arr[i], new_size[i])
             if i == d
                 # b+1 is the highest positive frequency which 
                 # will be cut off (under certain conditions)
-                iend = min(b+1, size(arr)[i])
+                iend = min(b+1, size_arr[i])
                 push!(inds_extract, iend:iend)
                 push!(inds_assign, a:a)
             else
-                push!(inds_extract, a:min(b+1, size(arr)[i]))
-                push!(inds_assign, a:min(b+1, size(arr)[i]))
+                push!(inds_extract, a:min(b+1, size_arr[i]))
+                push!(inds_assign, a:min(b+1, size_arr[i]))
             end
         end
 

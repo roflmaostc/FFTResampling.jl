@@ -21,16 +21,17 @@ julia> ] add FFTResampling
 
 ## Functionality
 The FFTW based methods require periodic, bandwidth limited (and properly Nyquist sampled) signals.
-Currently the algorithms work only with equidistant spaced signals. We offer two main methods: `sinc_interpolate` and `downsample`.
-The first one upsamples a signal by zero padding in Fourier space.
-The second one downsamples a signal by cropping frequencies around the center spot. We therefore reduce resolution without aliasing. 
+Currently the algorithms work only with equidistant spaced signals. We offer one main method: `resample`
+It offers upsampling of a signal by zero padding the spectrum in Fourier space.
+Secondly, a signal can be downsampled by cropping frequencies around the center spot in Fourier space. We therefore reduce resolution without aliasing. 
 
 
 ## Example
 
 ### Sinc interpolation
-Below you can find a simple example for `sinc_interpolate` and `sinc_interpolate_sum`.
-Furthermore, there is an image interpolation Pluto.jl notebook in the [examples folder](examples/).
+Below you can find a simple example for up sampling using `resample` and `sinc_interpolate_sum`.
+`sinc_interpolate_sum` is a slow sum based method.
+Furthermore, there is an image interpolation [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook in the [examples folder](examples/).
 We can see that the interpolated signal matches the higher sampled signal well.
 ```julia
  begin
@@ -48,7 +49,7 @@ end
 begin
 	N = 1000
 	xs_interp = range(x_min, x_max, length=N+1)[1:N]
-	arr_interp = sinc_interpolate(arr_low, N)
+	arr_interp = resample(arr_low, N)
 
 	N2 = 1000
 	xs_interp_s = range(x_min, x_max, length=N2+1)[1:N2]
@@ -73,17 +74,28 @@ And as we can see, the downsampled signal still matches the original one.
 begin
 	N_ds = 32
 	xs_ds = range(x_min, x_max, length=N_ds+1)[1:N_ds]
-	arr_ds = FFTResampling.downsample(arr_high, N_ds)
+	arr_ds = resample(arr_high, N_ds)
 end
 
 begin
 	scatter(xs_low, arr_low, legend=:bottomleft, markersize=2, label="Low sampling")
 	plot!(xs_interp, arr_interp, label="FFT based sinc interpolation", linestyle=:dash)
-	plot!(xs_ds, arr_ds, label="downsampled array", linestyle=:dot)	
+	plot!(xs_ds, arr_ds, label="resampled array", linestyle=:dot)	
 end
 ```
 
 ![](examples/plot_ds.png)
+
+
+# Image Upsampling
+Having a Nyquist sampled image, it is possible to perform a sinc interpolation and creating visually much nicer images.
+However, the information content does not change between both images.
+The full Pluto notebook is [here](examples/image_interpolation.jl).
+
+
+![](examples/image_low_res.png)
+![](examples/image_high_res.png)
+
 
 
 
