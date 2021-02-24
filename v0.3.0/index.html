@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>FFTResampling.jl · FFTResampling.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">FFTResampling.jl</span></div><form class="docs-search" action="search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>FFTResampling.jl</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>FFTResampling.jl</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>FFTResampling.jl</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/roflmaostc/FFTResampling.jl/blob/master/docs/src/index.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FFTResampling.jl"><a class="docs-heading-anchor" href="#FFTResampling.jl">FFTResampling.jl</a><a id="FFTResampling.jl-1"></a><a class="docs-heading-anchor-permalink" href="#FFTResampling.jl" title="Permalink"></a></h1><p>Here you can find the docstrings of all functions.</p><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.resample" href="#FFTResampling.resample"><code>FFTResampling.resample</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">resample(arr, new_size [, normalize])</code></pre><p>Calculates the <code>sinc</code> interpolation of an <code>arr</code> on a new array size <code>new_size</code>. It is a re-evaluation of the Fourier series at new grid points. <code>new_size</code> can be arbitrary. Each dimension is then independently either up or downsampled.</p><p>This method is based on FFTs and therefore implicitly assumes periodic boundaries and a finite frequency support. <code>normalize=true</code> by default multiplies by an appropriate factor so that  the average intensity stays the same. If <code>size(new_size)[i] &gt; size(arr)[i]</code>, we apply zero padding in Fourier space. If <code>size(new_size)[i] &lt; size(arr)[i]</code>, we cut out a centered part of the Fourier spectrum. We apply some tricks at the boundary to increase accuracy of highest frequencies. </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; resample([1.0, 2.0, 3.0, 4.0], 8)
+8-element Array{Float64,1}:
+ 1.0
+ 1.085786437626905
+ 2.0
+ 2.5
+ 3.0
+ 3.914213562373095
+ 4.0
+ 2.5
+
+julia&gt; resample([1.0  2.0; 3.0 4.0], (4,4))
+4×4 Array{Float64,2}:
+ 1.0  1.5  2.0  1.5
+ 2.0  2.5  3.0  2.5
+ 3.0  3.5  4.0  3.5
+ 2.0  2.5  3.0  2.5
+
+julia&gt; resample([1.0, 0.0, 1.0, 0.0, 1.0, 0.0], (3))
+3-element Array{Float64,1}:
+ 0.5
+ 0.5
+ 0.5
+
+julia&gt; resample([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], (6))
+6-element Array{Float64,1}:
+  1.0
+ -0.3333333333333333
+  1.0
+ -0.3333333333333333
+  1.0
+ -0.3333333333333333
+
+julia&gt; resample([1 2 3; 4 5 6], (3, 2))
+3×2 Array{Float64,2}:
+ 1.0   3.0
+ 3.25  5.25
+ 3.25  5.25</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/sinc_interpolation.jl#L5-L63">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.sinc_interpolate_sum" href="#FFTResampling.sinc_interpolate_sum"><code>FFTResampling.sinc_interpolate_sum</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">sinc_interpolate_sum(arr, new_length)</code></pre><p>Calculates the <code>sinc</code> interpolation of an 1D <code>arr</code> on a new array size <code>new_size</code>.  This method is slow, because of an explicit sum evalulation and not a FFT based evaluation.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; sinc_interpolate_sum([1.0, 2.0, 3.0, 4.0], 8)
+8-element Array{Float64,1}:
+ 1.0
+ 1.7825353626292277
+ 2.0
+ 2.1220659078919377
+ 3.0
+ 4.1592491794681985
+ 4.0
+ 2.0735615442829793</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/sinc_interpolation.jl#L137-L158">source</a></section></article><p>Additionally we have some utility functions:</p><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.make_hermitian" href="#FFTResampling.make_hermitian"><code>FFTResampling.make_hermitian</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">make_hermitian(arr)</code></pre><p>Takes an array <code>arr</code> and appends rows, cols, ... if necessary so that <code>arr</code> is a hermitian array which preserves Parseval&#39;s theorem.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; FFTResampling.make_hermitian([1.0 2.0])
+1×3 Array{Float64,2}:
+ 0.5  2.0  0.5
+
+julia&gt; FFTResampling.make_hermitian([1.0 2.0; 3.0 4.0])
+3×3 Array{Float64,2}:
+ 0.5  1.0  0.0
+ 1.5  4.0  1.5
+ 0.0  1.0  0.5
+
+julia&gt; FFTResampling.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
+3×3 Array{Complex{Float64},2}:
+ 0.0+0.5im  2.0+0.0im  2.5-0.0im
+ 0.0+1.5im  0.0+4.0im  0.0-1.5im
+ 2.5+0.0im  0.0+6.0im  0.0-0.5im</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L1-L25">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.reverse_all" href="#FFTResampling.reverse_all"><code>FFTResampling.reverse_all</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">reverse_all(arr)</code></pre><p>Reverse an array <code>arr</code> over all dimensions.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; FFTResampling.reverse_all([1 2 3 4 5])
+1×5 Array{Int64,2}:
+ 5  4  3  2  1
+
+julia&gt; FFTResampling.reverse_all([1 2 3 4 5; 7 8 9 10 11])
+2×5 Array{Int64,2}:
+ 11  10  9  8  7
+  5   4  3  2  1
+
+julia&gt; FFTResampling.reverse_all([1; 2; 3; 4; 5])
+5-element Array{Int64,1}:
+ 5
+ 4
+ 3
+ 2
+ 1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L230-L254">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.slice" href="#FFTResampling.slice"><code>FFTResampling.slice</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">slice(arr, dim, index)</code></pre><p>Return a <code>N</code> dimensional slice (where one dimensions has size 1) of the N-dimensional <code>arr</code> at the index position <code>index</code> in the <code>dim</code> dimension of the array. It holds <code>size(out)[dim] == 1</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; x = [1 2 3; 4 5 6; 7 8 9]
+3×3 Array{Int64,2}:
+ 1  2  3
+ 4  5  6
+ 7  8  9
+
+julia&gt; FFTResampling.slice(x, 1, 1)
+1×3 view(::Array{Int64,2}, 1:1, :) with eltype Int64:
+ 1  2  3
+
+julia&gt; FFTResampling.slice(x, 2, 3)
+3×1 view(::Array{Int64,2}, :, 3:3) with eltype Int64:
+ 3
+ 6
+ 9
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L184-L211">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.center_extract" href="#FFTResampling.center_extract"><code>FFTResampling.center_extract</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">center_extract(arr, new_size_array)</code></pre><p>Extracts a center of an array.  <code>new_size_array</code> must be list of sizes indicating the output size of each dimension. Centered means that a center frequency stays at the center position. Works for even and uneven. If <code>length(new_size_array) &lt; length(ndims(arr))</code> the remaining dimensions are untouched and copied.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; FFTResampling.center_extract([1 2; 3 4], [1]) 
+1×2 Array{Int64,2}:
+ 3  4
+
+julia&gt; FFTResampling.center_extract([1 2; 3 4], [1, 1])
+1×1 Array{Int64,2}:
+ 4
+
+julia&gt; FFTResampling.center_extract([1 2 3; 3 4 5; 6 7 8], [2 2])
+2×2 Array{Int64,2}:
+ 1  2
+ 3  4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L92-L115">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.center_set!" href="#FFTResampling.center_set!"><code>FFTResampling.center_set!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">center_set!(arr_large, arr_small)</code></pre><p>Puts the <code>arr_small</code> central into <code>arr_large</code>. The convention, where the center is, is the same as the definition as for FFT based centered. Function works both for even and uneven arrays.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; FFTResampling.center_set!([1, 1, 1, 1, 1, 1], [5, 5, 5])
+6-element Array{Int64,1}:
+ 1
+ 1
+ 5
+ 5
+ 5
+ 1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L133-L150">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.center_pos" href="#FFTResampling.center_pos"><code>FFTResampling.center_pos</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">center_pos(x)</code></pre><p>Calculate the position of the center frequency. Size of the array is <code>x</code></p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; FFTResampling.center_pos(3)
+2
+julia&gt; FFTResampling.center_pos(4)
+3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L165-L176">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="FFTResampling.get_indices_around_center" href="#FFTResampling.get_indices_around_center"><code>FFTResampling.get_indices_around_center</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">get_indices_around_center(i_in, i_out)</code></pre><p>A function which provides two output indices <code>i1</code> and <code>i2</code> where <code>i2 - i1 = i_out</code> The indices are chosen in a way that the set <code>i1:i2</code> cuts the interval <code>1:i_in</code> in a way that the center frequency stays at the center position. Works for both odd and even indices</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/roflmaostc/FFTResampling.jl/blob/939ef781476fcc492a078da6d190c741f9485a52/src/utils.jl#L68-L76">source</a></section></article></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 24 February 2021 22:34">Wednesday 24 February 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
