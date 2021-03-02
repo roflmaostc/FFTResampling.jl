@@ -110,14 +110,12 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
     # of the initial spectrum
     # to the highest negative one. In that way, we get a purely real result
     if boundary_handling
-        arr_out_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
-    else
-        arr_out_f = arr_f
+        arr_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
     end
     # return arr_out_f
 
     # do the cutting in Fourier space
-    arr_f_n = center_extract(arr_out_f, new_size)
+    arr_f_n = center_extract(arr_f, new_size)
     # back to real space 
     arr_out = ifft(ifftshift(arr_f_n))
     
