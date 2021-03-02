@@ -3,7 +3,7 @@ export resample
 
 
 """
-    resample(arr, new_size [, normalize])
+    resample(arr, new_size [, normalize]; take_real=true, boundary_handling=true)
 
 Calculates the `sinc` interpolation of an `arr` on a new array size
 `new_size`.
@@ -17,7 +17,11 @@ the average intensity stays the same.
 If `size(new_size)[i] > size(arr)[i]`, we apply zero padding in Fourier space.
 If `size(new_size)[i] < size(arr)[i]`, we cut out a centered part of the
 Fourier spectrum.
+
 We apply some tricks at the boundary to increase accuracy of highest frequencies. 
+If you set the keyword argument `boundary_handling=false` you turn this boundary handling off.
+This can increase inaccuracies for the highest frequency (not a big problem in real images/signals).
+However, `resample` is then faster on CPUs and especially on CUDA GPUs.
 
 # Examples
 ```jldoctest
@@ -61,7 +65,7 @@ julia> resample([1 2 3; 4 5 6], (3, 2))
  3.25  5.25
 ```
 """
-function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=true ) where {T<:Real, N}
+function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=true, boundary_handling=true) where {T<:Real, N}
 
     if typeof(new_size) <: Number
         new_size = Tuple(new_size)
@@ -77,14 +81,14 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
     # a new array which is a least as large as the initial one or larger
     # 2) we then handle all the downsampling dimensions
     new_size_interp = Tuple(max(x[1], x[2]) for x in zip(size(arr), new_size))
-    out_f = zeros(eltype(arr_f), new_size_interp)
-
+    out_f = similar(arr_f, new_size_interp)
+    fill!(out_f, zero(eltype(arr_f)))
 
     # change arr_f to be a hermitian array because we want a purely real result
     # after iffting
    
     # in that case, make_hermitian is useless since we only cut out
-    if ~(all(new_size < size(arr)))
+    if boundary_handling && ~(all(new_size < size(arr)))
         arr_f = make_hermitian(arr_f)
     end
 
@@ -105,7 +109,11 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
     # if the new_size[d] is even, we need to add the highest positive frequency
     # of the initial spectrum
     # to the highest negative one. In that way, we get a purely real result
-    arr_out_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
+    if boundary_handling
+        arr_out_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
+    else
+        arr_out_f = arr_f
+    end
     # return arr_out_f
 
     # do the cutting in Fourier space
