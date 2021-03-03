@@ -1,7 +1,7 @@
 name = "FFTResampling"
 uuid = "c3173eba-33fe-4761-8a84-0ec65b39ba9a"
 authors = ["roflmaostc <fxw+git@mailbox.org>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
