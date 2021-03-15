@@ -111,3 +111,7 @@ The right image is the upsampled version of the left one.
 
 [codecov-img]: https://codecov.io/gh/roflmaostc/FFTResampling.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/roflmaostc/FFTResampling.jl
+
+
+# Acknowledgements
+There is also a discussion on [Discourse](https://discourse.julialang.org/t/sinc-interpolation-based-on-fft/52512) about some of the issues that were encountered during creation of that package..
