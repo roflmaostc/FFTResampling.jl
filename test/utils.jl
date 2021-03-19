@@ -52,12 +52,12 @@ end
 @testset "slice indices" begin
     x = randn((1,2,3))
     y = FFTResampling.slice_indices(x, 1, 1)
-    @test y == [1:1, :, :]
+    @test y == [1:1, 1:2, 1:3]
 
 
     x = randn((20,4,20, 1, 2))
     y = FFTResampling.slice_indices(x, 2, 3)
-    @test y == [:, 3:3, :, :, :]
+    @test y == [1:20, 3:3, 1:20, 1:1, 1:2]
 end
 
 

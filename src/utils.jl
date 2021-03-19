@@ -214,17 +214,13 @@ function slice(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T,
     return @view arr[inds...]
 end
 
-
-
 function slice_indices(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T, N}
-    @assert 1 ≤ dim ≤ N
-    
-    inds = Array{Any}(undef, N)
-    inds = fill!(inds, :)
-    inds[dim] = index:index
-
+    f(x) = x[1] == dim ? (index:index) : (1:x[2])
+    inds = map(f, enumerate(size(arr)))
     return inds
 end
+
+
 
 
 """
