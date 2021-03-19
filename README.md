@@ -25,6 +25,7 @@ Currently the algorithms work only with equidistant spaced signals. We offer one
 It offers upsampling of a signal by zero padding the spectrum in Fourier space.
 Secondly, a signal can be downsampled by cropping frequencies around the center spot in Fourier space. We therefore reduce resolution without aliasing. 
 
+This package also works partially with CUDA arrays. You need to set the keyword argument `boundary_handling=false` in `resample` to prevent a scalar indexing allowing a fast execution.
 
 ## Example
 
@@ -110,3 +111,7 @@ The right image is the upsampled version of the left one.
 
 [codecov-img]: https://codecov.io/gh/roflmaostc/FFTResampling.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/roflmaostc/FFTResampling.jl
+
+
+# Acknowledgements
+There is also a discussion on [Discourse](https://discourse.julialang.org/t/sinc-interpolation-based-on-fft/52512) about some of the issues that were encountered during creation of that package.
