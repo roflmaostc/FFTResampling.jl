@@ -80,14 +80,20 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
 
     # arr_f might be in some dimensions larger than the new_size. Therefore extract it, when needed
     common_size = min.(new_size, size(arr))
-    arr_f_extract = center_extract(arr_f, common_size)
+    arr_f_extract = center_extract(arr_f, common_size, view=true)
     
+   
     center_set!(arr_out_f, arr_f_extract)
     
-    # you might need to fix hermitian property
+    # might need to fix hermitian property
     if boundary_handling 
         make_hermitian!(arr_out_f, size(arr))
     end
+
+    if boundary_handling
+        add_high_frequencies!(arr_f, arr_out_f)
+    end
+
 
     arr_out = ifft(ifftshift(arr_out_f))
     

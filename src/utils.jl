@@ -8,17 +8,26 @@ function make_hermitian!(arr, old_size)
         if old_size[dim] % 2 == 1 || size(arr, dim) ≤ old_size[dim]
             continue
         else
+            # to construct the hermitian property, we go to a smaller
+            # view array and work in this smaller one
+            # easier to access and reverse the right slices
             smaller_view_inds = ntuple(n -> n != dim ? size(arr, n) : old_size[dim] + 1, ndims(arr))
             arr_v = center_extract(arr, smaller_view_inds, view=true)
-            
+           
+            # the array @l_inds we know
             l_inds = slice_indices(arr_v, dim, 1)
+            # at r_inds we need to fix values to be hermitian
             r_inds = slice_indices(arr_v, dim, size(arr_v, dim))
             arr_left_slice = @view arr_v[l_inds...]
+            # preserve sum of FFT entries, therefore half it
+            # since it is view, in place
             arr_left_slice .*= 0.5
             reverse_inds = reverse_all_indices(arr_left_slice)
-
+            # assign right indices
             arr_v[r_inds...] = conj.(arr_left_slice[reverse_inds...])
             
+            # the corner is sometimes to often halved
+            # do it only once!
             if fix_corner
                 arr_v[end] *= 2
                 arr_v[1] *= 2
@@ -29,71 +38,93 @@ function make_hermitian!(arr, old_size)
     return arr
 end
 
+
+
+function add_high_frequencies!(arr_f_in, arr_f_out)
+    fix_corner = false
+    for dim = 1:ndims(arr_f_in)
+        if (size(arr_f_out,dim) % 2 == 0 && 
+                    size(arr_f_in, dim) > size(arr_f_out, dim)) 
+            smaller_view_inds = ntuple(n -> n != dim ? min(size(arr_f_out, n), size(arr_f_in, dim)) : size(arr_f_out, dim) + 1, ndims(arr_f_out))
+
+            arr_v = center_extract(arr_f_out, smaller_view_inds, view=true)
+           
+            # the array @l_inds we know
+            # at r_inds we need to fix values to be hermitian
+            r_inds = slice_indices(arr_v, dim, size(arr_v, dim))
+            arr_right_slice = @view arr_v[r_inds...]
+            # preserve sum of FFT entries, therefore half it
+            # since it is view, in place
+            reverse_inds = reverse_all_indices_and_crop(arr_right_slice, dim)
+            # assign right indices
+            l_inds = slice_indices(arr_v, dim, 1)
+            arr_f_out[l_inds...] .+= (arr_right_slice[reverse_inds...])
+            arr_f_out[l_inds...] .= 0
+            @show l_inds 
+            @show size(arr_v)
+            @show size(arr_f_in)
+            @show size(arr_f_out)
+            # the corner is sometimes to often halved
+            # do it only once!
+            if fix_corner
+                arr_f_out[1] = 0 * real(arr_f_in[1])
+            end
+            fix_corner = true 
+        end
+    end
+end
+        
+
+
+
 """
-    make_hermitian(arr)
+This function ensures the constraints a spectrum must have so that after
+iffting the result is purely real.
 
-Takes an array `arr` and appends rows, cols, ... if necessary
-so that `arr` is a hermitian array which preserves Parseval's theorem.
-
-# Examples
-```jldoctest
-julia> FFTResampling.make_hermitian([1.0 2.0])
-1×3 Array{Float64,2}:
- 0.5  2.0  0.5
-
-julia> FFTResampling.make_hermitian([1.0 2.0; 3.0 4.0])
-3×3 Array{Float64,2}:
- 0.5  1.0  0.0
- 1.5  4.0  1.5
- 0.0  1.0  0.5
-
-julia> FFTResampling.make_hermitian([1im 2.0; 3.0im 4.0im; 5.0 6.0im])
-3×3 Array{Complex{Float64},2}:
- 0.0+0.5im  2.0+0.0im  2.5-0.0im
- 0.0+1.5im  0.0+4.0im  0.0-1.5im
- 2.5+0.0im  0.0+6.0im  0.0-0.5im
-```
+For example, inspect `ffshift(fft(randn((6,6))))` and you see that the highest negative
+frequencies obey a certain symmetry. This can be generalized to N dimensions.
+If we cut the array so that it'll be even in the that d dimension (new_size[d] % 2 ==0)
+we need to manually restore the symmetry to guarantee a purely real result.
 """
-function make_hermitian(arr::AbstractArray{T, N}) where {T, N}
-    # if the size is odd, we need to add a slice to that dimension
-    # at this slice we then fill new values, so that `arr` is hermitian
-    mf(x) = x % 2 == 0 ? x +1 : x
-    size_new = map(mf, size(arr))
-    # new array with new size 
-    arr_new = zeros(eltype(arr), size_new)
-    
-    # fill the new array with the old one 
-    same_ind = map(x -> 1:x, size(arr))
-    arr_new[same_ind...] = arr 
-    
-    # copy again to have a out array (might be necessary because of reassigning)
-    arr_out = copy(arr_new)
-    
-    # now modify values at the edges to get hermitian property
-    # and Parsveval's theorem correct
-    @inbounds for d = 1:N
-        # special case when singleton dimension 
-        if size(arr_new)[d] == 1 || size(arr)[d] % 2 == 1
+function add_high_frequencies(size_arr, arr_out_f, new_size, N)
+    fix_mul = false
+    for d = 1:N
+        if new_size[d] % 2 == 1 || new_size[d] == size_arr[d] ||
+            (size_arr[d] % 2 == 0 && new_size[d] == (size_arr[d] + 1))
             continue
         end
-    
-        # extract indices represent the left slice we need to copy
-        extract_indices = slice_indices(arr_new, d, 1)
-        y = arr_new[extract_indices...] ./ 2
-        y_rev = reverse_all(y)
         
-        # assign indices represent the right sliuce we need to assign the
-        # conjugated and halved one
-        assign_indices = slice_indices(arr_new, d, size(arr_out)[d])
+        # construct the slice containing the highest positive frequency
+        inds_extract = []
+        inds_assign = []
 
-        # assign the halved
-        arr_out[extract_indices...] = y
-        # assign the conjugated, halved one
-        arr_out[assign_indices...] = conj.(y_rev)
+        for i = 1:N
+            a,b = get_indices_around_center(size_arr[i], new_size[i])
+            if i == d
+                # b+1 is the highest positive frequency which 
+                # will be cut off (under certain conditions)
+                iend = min(b+1, size_arr[i])
+                push!(inds_extract, iend:iend)
+                push!(inds_assign, a:a)
+            else
+                push!(inds_extract, a:min(b+1, size_arr[i]))
+                push!(inds_assign, a:min(b+1, size_arr[i]))
+            end
+        end
+
+        # add the highest positive frequency slice to the highest negative
+        # but use the same arr_out_f
+        # in that way we create a matrix which has the demanded symmetry of FFT to produce a real result
+        arr_out_f[inds_assign...] = (arr_out_f[inds_assign...] .+ arr_out_f[inds_extract...])
     end
-
-    return arr_out
+    
+    return arr_out_f
 end
+
+
+
+
+
 
 
 """
@@ -297,6 +328,19 @@ function reverse_all_indices(arr)
 end
 
 
+function reverse_all_indices_and_crop(arr, dim)
+    out = []
+    for i in 1:ndims(arr)
+        if i == dim
+            push!(out, size(arr, i):-1:1)
+        else 
+            push!(out, size(arr, i):-1:1)
+        end
+    end
+    return out 
+end
+
+
 
 function dft_1D(arr)
     N = length(arr)
@@ -325,47 +369,4 @@ end
 
 
 
-"""
-This function ensures the constraints a spectrum must have so that after
-iffting the result is purely real.
-
-For example, inspect `ffshift(fft(randn((6,6))))` and you see that the highest negative
-frequencies obey a certain symmetry. This can be generalized to N dimensions.
-If we cut the array so that it'll be even in the that d dimension (new_size[d] % 2 ==0)
-we need to manually restore the symmetry to guarantee a purely real result.
-"""
-function add_high_frequencies(size_arr, arr_out_f, new_size, N)
-    fix_mul = false
-    for d = 1:N
-        if new_size[d] % 2 == 1 || new_size[d] == size_arr[d] ||
-            (size_arr[d] % 2 == 0 && new_size[d] == (size_arr[d] + 1))
-            continue
-        end
-        
-        # construct the slice containing the highest positive frequency
-        inds_extract = []
-        inds_assign = []
-
-        for i = 1:N
-            a,b = get_indices_around_center(size_arr[i], new_size[i])
-            if i == d
-                # b+1 is the highest positive frequency which 
-                # will be cut off (under certain conditions)
-                iend = min(b+1, size_arr[i])
-                push!(inds_extract, iend:iend)
-                push!(inds_assign, a:a)
-            else
-                push!(inds_extract, a:min(b+1, size_arr[i]))
-                push!(inds_assign, a:min(b+1, size_arr[i]))
-            end
-        end
-
-        # add the highest positive frequency slice to the highest negative
-        # but use the same arr_out_f
-        # in that way we create a matrix which has the demanded symmetry of FFT to produce a real result
-        arr_out_f[inds_assign...] = (arr_out_f[inds_assign...] .+ arr_out_f[inds_extract...])
-    end
-    
-    return arr_out_f
-end
 
