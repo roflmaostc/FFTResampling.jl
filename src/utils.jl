@@ -1,6 +1,6 @@
 function make_hermitian!(arr, old_size)
 
-    fix_corner = -1 
+    fix_corner = false 
     # we loop over all dimensions which need to be fixed with hermitian property
     for dim = 1:length(old_size)
         # if initial array is odd, we don't need to fix hermitian property
@@ -8,30 +8,23 @@ function make_hermitian!(arr, old_size)
         if old_size[dim] % 2 == 1 || size(arr, dim) ≤ old_size[dim]
             continue
         else
-            # increase corner fix counter
-            fix_corner += 1 
-            ind_l, ind_r = get_indices_around_center(size(arr, dim), old_size[dim])
-            ind_r += 1
-            arr_left_slice = slice(arr, dim, ind_l)
-            arr_left_slice ./= 2
-            s_inds = slice_indices(arr, dim, ind_r)
+            smaller_view_inds = ntuple(n -> n != dim ? size(arr, n) : old_size[dim] + 1, ndims(arr))
+            arr_v = center_extract(arr, smaller_view_inds, view=true)
             
-            region_reverse_indices = region_revert_inds(arr, old_size)
-            region_assign_indices = copy(region_reverse_indices) 
-            region_reverse_indices[dim] = 1:1
-            region_assign_indices[dim] = ind_r:ind_r
-            arr[region_assign_indices...] = conj.(reverse_all(arr_left_slice[region_reverse_indices...]))
-            # arr[s_inds...] = conj.(arr_left_slice[reverse_inds...])
+            l_inds = slice_indices(arr_v, dim, 1)
+            r_inds = slice_indices(arr_v, dim, size(arr_v, dim))
+            arr_left_slice = @view arr_v[l_inds...]
+            arr_left_slice .*= 0.5
+            reverse_inds = reverse_all_indices(arr_left_slice)
+
+            arr_v[r_inds...] = conj.(arr_left_slice[reverse_inds...])
+            
+            if fix_corner
+                arr_v[end] *= 2
+                arr_v[1] *= 2
+            end
+            fix_corner = true
         end
-    end
- ## corner was divided too often, fix it
-    if fix_corner ≥ 0
-        @show "lol"
-        corner = get_indices_around_center.(size(arr), old_size)
-        corner_l = map(first, corner)
-        corner_r = map(x-> 1 + x[2], corner)
-        arr[corner_l...] *= 2 ^fix_corner
-        arr[corner_r...] = conj(arr[corner_l...])
     end
     return arr
 end
@@ -257,8 +250,8 @@ function slice(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T,
 end
 
 function slice_indices(arr::AbstractArray{T, N}, dim::Integer, index::Integer) where {T, N}
-    f(x) = x[1] == dim ? (index:index) : (1:x[2])
-    inds = map(f, enumerate(size(arr)))
+    f(x) = x == dim ? (index:index) : (1:size(arr, x))
+    inds = ntuple(f, ndims(arr))
     return inds
 end
 
@@ -321,10 +314,10 @@ end
 
 
 function region_revert_inds(arr, old_size)
-    inds = [1:1 for i = 1:ndims(arr)] 
+    inds = repeat(1:1, ndims(arr)) 
     for d = 1:ndims(arr)
-        ind_l, ind_r = get_indices_around_center(size(arr, d), old_size[d])
-        inds[d] = (ind_l+1):(ind_r+1)
+        ind_l, ind_r = get_indices_around_center(size(arr, dim), old_size[dim])
+        inds[d] = ind_l_ind_r
     end
     return inds
 end
