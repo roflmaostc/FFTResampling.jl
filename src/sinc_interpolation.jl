@@ -85,14 +85,15 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
    
     center_set!(arr_out_f, arr_f_extract)
     
+    if boundary_handling
+        add_high_frequencies!(arr_f, arr_out_f)
+    end
+    
     # might need to fix hermitian property
     if boundary_handling 
         make_hermitian!(arr_out_f, size(arr))
     end
 
-    if boundary_handling
-        add_high_frequencies!(arr_f, arr_out_f)
-    end
 
 
     arr_out = ifft(ifftshift(arr_out_f))

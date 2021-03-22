@@ -67,7 +67,9 @@ end
         y = resample(x, s_n, take_real=false)
         y2 = resample(x, s_n2, take_real=false)
         @test all(imag.(y) .< 5e-15)
-        @test all(imag.(y2) .< 5e-14)
+        @test all(imag.(y2) .< 5e-13)
+        @show maximum(imag.(y2))
+        @show size(y2) 
     end
     
     test_real((12, 13, 14, 15), (12, 12, 12, 12), (20, 21, 22, 23))

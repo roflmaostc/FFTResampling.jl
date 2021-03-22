@@ -45,25 +45,25 @@ function add_high_frequencies!(arr_f_in, arr_f_out)
     for dim = 1:ndims(arr_f_in)
         if (size(arr_f_out,dim) % 2 == 0 && 
                     size(arr_f_in, dim) > size(arr_f_out, dim)) 
-            smaller_view_inds = ntuple(n -> n != dim ? min(size(arr_f_out, n), size(arr_f_in, dim)) : size(arr_f_out, dim) + 1, ndims(arr_f_out))
+            # smaller_view_inds = ntuple(n -> n != dim ? min(size(arr_f_out, n), size(arr_f_in, dim)) : size(arr_f_out, dim) + 1, ndims(arr_f_out))
 
-            arr_v = center_extract(arr_f_out, smaller_view_inds, view=true)
+            # @show size(arr_v)
+            @show size(arr_f_in)
+            @show size(arr_f_out)
+            # @show smaller_view_inds 
+            # arr_v = center_extract(arr_f_in, smaller_view_inds, view=true)
            
             # the array @l_inds we know
             # at r_inds we need to fix values to be hermitian
-            r_inds = slice_indices(arr_v, dim, size(arr_v, dim))
-            arr_right_slice = @view arr_v[r_inds...]
+            r_inds = slice_indices(arr_f_out, dim, size(arr_f_out, dim))
+            arr_right_slice = @view arr_f_out[r_inds...]
             # preserve sum of FFT entries, therefore half it
             # since it is view, in place
             reverse_inds = reverse_all_indices_and_crop(arr_right_slice, dim)
             # assign right indices
-            l_inds = slice_indices(arr_v, dim, 1)
+            l_inds = slice_indices(arr_f_out, dim, 1)
             arr_f_out[l_inds...] .+= (arr_right_slice[reverse_inds...])
             arr_f_out[l_inds...] .= 0
-            @show l_inds 
-            @show size(arr_v)
-            @show size(arr_f_in)
-            @show size(arr_f_out)
             # the corner is sometimes to often halved
             # do it only once!
             if fix_corner
