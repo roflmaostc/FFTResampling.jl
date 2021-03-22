@@ -73,24 +73,37 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
 
     # go to fourier space
     arr_f = fftshift(fft(arr))
-    # create fourier space new array
     
-    # the idea is the following
-    # 1) first we handle all the upsampling dimensions. By doing so, we leave the size
-    # or increase it. downsampling is done afterwards. Hence we use max to create 
-    # a new array which is a least as large as the initial one or larger
-    # 2) we then handle all the downsampling dimensions
-    new_size_interp = Tuple(max(x[1], x[2]) for x in zip(size(arr), new_size))
-    out_f = similar(arr_f, new_size_interp)
-    fill!(out_f, zero(eltype(arr_f)))
+    # create fourier space new array
+    arr_out_f = similar(arr_f, new_size)
+    fill!(arr_out_f, zero(eltype(arr_f)))
+
+    # arr_f might be in some dimensions larger than the new_size. Therefore extract it, when needed
+    common_size = min.(new_size, size(arr))
+    arr_f_extract = center_extract(arr_f, common_size)
+    
+    center_set!(arr_out_f, arr_f_extract)
+    
+    # you might need to fix hermitian property
+    if boundary_handling 
+        make_hermitian!(arr_out_f, size(arr))
+    end
+
+    arr_out = ifft(ifftshift(arr_out_f))
+    
+
+    if normalize
+        arr_out .*= length(arr_out) ./ length(arr)
+    end
+    if take_real
+        return real(arr_out)
+    else
+        return arr_out
+    end
 
     # change arr_f to be a hermitian array because we want a purely real result
     # after iffting
    
-    # in that case, make_hermitian is useless since we only cut out
-    if boundary_handling && ~(all(new_size < size(arr)))
-        arr_f = make_hermitian(arr_f)
-    end
 
     # it can happen, that arr_f was now padded with an extra row
     # but there is no extra column in out_f
@@ -109,25 +122,14 @@ function resample(arr::AbstractArray{T, N}, new_size, normalize=true; take_real=
     # if the new_size[d] is even, we need to add the highest positive frequency
     # of the initial spectrum
     # to the highest negative one. In that way, we get a purely real result
-    if boundary_handling
-        arr_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
-    end
+ #    if boundary_handling
+ #       arr_f = add_high_frequencies(size(arr_f), arr_f, new_size, N)
+ #   end
     # return arr_out_f
 
     # do the cutting in Fourier space
     arr_f_n = center_extract(arr_f, new_size)
     # back to real space 
-    arr_out = ifft(ifftshift(arr_f_n))
-    
-
-    if normalize
-        arr_out .*= length(arr_out) ./ length(arr)
-    end
-    if take_real
-        return real(arr_out)
-    else
-        return arr_out
-    end
 end
 
  # for a complex signal: split into real and imaginary part and solve for each 

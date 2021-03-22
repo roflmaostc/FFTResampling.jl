@@ -1,3 +1,41 @@
+function make_hermitian!(arr, old_size)
+
+    fix_corner = -1 
+    # we loop over all dimensions which need to be fixed with hermitian property
+    for dim = 1:length(old_size)
+        # if initial array is odd, we don't need to fix hermitian property
+        # if we downsample, don't fix 
+        if old_size[dim] % 2 == 1 || size(arr, dim) ≤ old_size[dim]
+            continue
+        else
+            # increase corner fix counter
+            fix_corner += 1 
+            ind_l, ind_r = get_indices_around_center(size(arr, dim), old_size[dim])
+            ind_r += 1
+            arr_left_slice = slice(arr, dim, ind_l)
+            arr_left_slice ./= 2
+            s_inds = slice_indices(arr, dim, ind_r)
+            
+            region_reverse_indices = region_revert_inds(arr, old_size)
+            region_assign_indices = copy(region_reverse_indices) 
+            region_reverse_indices[dim] = 1:1
+            region_assign_indices[dim] = ind_r:ind_r
+            arr[region_assign_indices...] = conj.(reverse_all(arr_left_slice[region_reverse_indices...]))
+            # arr[s_inds...] = conj.(arr_left_slice[reverse_inds...])
+        end
+    end
+ ## corner was divided too often, fix it
+    if fix_corner ≥ 0
+        @show "lol"
+        corner = get_indices_around_center.(size(arr), old_size)
+        corner_l = map(first, corner)
+        corner_r = map(x-> 1 + x[2], corner)
+        arr[corner_l...] *= 2 ^fix_corner
+        arr[corner_r...] = conj(arr[corner_l...])
+    end
+    return arr
+end
+
 """
     make_hermitian(arr)
 
@@ -90,13 +128,14 @@ end
 
 
 """
-    center_extract(arr, new_size_array)
+    center_extract(arr, new_size_array; view=false)
 Extracts a center of an array. 
 `new_size_array` must be list of sizes indicating the output
 size of each dimension. Centered means that a center frequency
 stays at the center position. Works for even and uneven.
 If `length(new_size_array) < length(ndims(arr))` the remaining dimensions
 are untouched and copied.
+`view=true` returns a view of `arr`. 
 # Examples
 ```jldoctest
 julia> FFTResampling.center_extract([1 2; 3 4], [1]) 
@@ -113,7 +152,7 @@ julia> FFTResampling.center_extract([1 2 3; 3 4 5; 6 7 8], [2 2])
  3  4
 ```
 """
-function center_extract(arr::AbstractArray, new_size_array)
+function center_extract(arr::AbstractArray, new_size_array; view=false)
     new_size_array = collect(new_size_array)
 
     # we construct two lists
@@ -126,6 +165,9 @@ function center_extract(arr::AbstractArray, new_size_array)
     
     # out_indices2 contains just ranges covering the full size of each dimension
     out_indices2 = [1:size(arr)[i] for i = (1 + length(new_size_array)):ndims(arr)]
+    if view
+        return @view arr[out_indices1..., out_indices2...]
+    end
     return arr[out_indices1..., out_indices2...]
 end
 
@@ -224,9 +266,10 @@ end
 
 
 """
-    reverse_all(arr)
+    reverse_all(arr; view=true)
 
 Reverse an array `arr` over all dimensions.
+`view=true` returns a view instead of a new array.
 
 # Examples
 ```jldoctest
@@ -248,8 +291,8 @@ julia> FFTResampling.reverse_all([1; 2; 3; 4; 5])
  1
 ```
 """
-function reverse_all(arr::AbstractArray)
-    return arr[reverse_all_indices(arr)...]
+function reverse_all(arr::AbstractArray; view=true)
+    return @view arr[reverse_all_indices(arr)...]
 end
 
 function reverse_all_indices(arr)
@@ -274,6 +317,16 @@ function dft_1D(arr)
         X[k+1] = s
     end
     return X
+end
+
+
+function region_revert_inds(arr, old_size)
+    inds = [1:1 for i = 1:ndims(arr)] 
+    for d = 1:ndims(arr)
+        ind_l, ind_r = get_indices_around_center(size(arr, d), old_size[d])
+        inds[d] = (ind_l+1):(ind_r+1)
+    end
+    return inds
 end
 
 
