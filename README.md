@@ -1,4 +1,8 @@
-# FFTResampling.jl
+# This package has been deprecated in favor of the more general [FourierTools.jl](https://github.com/bionanoimaging/FourierTools.jl)
+
+
+
+## FFTResampling.jl
 
 
 This package provides a simple sinc interpolation routine (up and downsampling) written in Julia.
@@ -12,12 +16,14 @@ It works with real and complex N-dimensional arrays.
 
 
 ## Installation
-`FFTResampling.jl` is available for all version equal or above Julia 1.3. It is mainly tested in Linux but should also work in Windows.
+`FFTResampling.jl` is has been tested version Julia from 1.3 to 1.6. It won't be maintained further.
 It can be installed with the following command
 
 ```julia
 julia> ] add FFTResampling
 ```
+However, please prefer [FourierTools.jl](https://github.com/bionanoimaging/FourierTools.jl) which is maintained and is also more performant.
+
 
 ## Functionality
 The FFTW based methods require periodic, bandwidth limited (and properly Nyquist sampled) signals.
